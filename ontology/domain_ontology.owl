@@ -484,7 +484,6 @@ As a heuristic definition, one can consider &quot;the class of all occurrents wh
 1. It is an Event (or rapid Process) representing a sudden change.
 2. It is a Malfunction, as the high BSW level achieved is incompatible with the primary function of producing oil efficiently. The state achieved (High BSW) prevents the system from performing its function correctly.
 3. It is NOT a Failure in the MALFO sense because it does not necessarily achieve a Fault (a state of inability due to an *internal* cause of the *component* exhibiting the state). The high BSW state itself is better classified as a DownState, as the inability to produce clean oil often results from external factors (reservoir water breakthrough) rather than an internal defect of the production line itself. The event &apos;Abrupt Increase BSW&apos; achieves this DownState.</rdfs:comment>
-        <www:MALFOachieves rdf:resource="https://www.w3id.org/MALFO#HighBSWState"/>
     </owl:Class>
     
 
@@ -898,7 +897,6 @@ Another example, this time in which the z is a state, is the `being cut into two
 1. Hydrate formation is a Process (crystallization under specific conditions).
 2. The process itself is NOT inherently a Malfunction.
 3. It transitively positively causes a Failure: The formation process leads to a blockage (which can be seen as a Failure event) achieving the Fault state &apos;Production Line Blocked by Hydrate&apos;. The state &apos;Hydrate Present in Production Line&apos; is a FailureCondition that eventually leads to the Fault.</rdfs:comment>
-        <www:MALFOtransitivePosCauseOf rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
     </owl:Class>
     
 
@@ -934,7 +932,6 @@ Another example, this time in which the z is a state, is the `being cut into two
 1. Hydrate formation is a Process (crystallization under specific conditions).
 2. The process itself is NOT inherently a Malfunction of the service line&apos;s primary purpose (though it prevents its use).
 3. It transitively positively causes a Failure: The formation process leads to a blockage (a Failure event) achieving the Fault state &apos;Service Line Blocked by Hydrate&apos;. The state &apos;Hydrate Present in Service Line&apos; is a FailureCondition leading to the Fault. This is analogous to Event 8 but in a different location.</rdfs:comment>
-        <www:MALFOtransitivePosCauseOf rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
     </owl:Class>
     
 
@@ -1261,7 +1258,6 @@ More precise definitions are left open to interpretation (e.g. through alignment
 1. It is an Event (a rapid change in valve position/opening).
 2. It is a Malfunction, as the unintended restriction is incompatible with the desired flow control function.
 3. It achieves a Fault: The state &apos;PCK is Undesirably Restricted&apos; is a Fault because it&apos;s a state of inability to perform the function (allow desired flow) due to an internal occurrence (the restriction event, often caused by operational problems or valve malfunction).</rdfs:comment>
-        <www:MALFOachieves rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
     </owl:Class>
     
 
@@ -1279,7 +1275,6 @@ More precise definitions are left open to interpretation (e.g. through alignment
 1. While it occurs over time, the *rapid* nature suggests focusing on the event of the loss becoming significant or the cessation of flow.
 2. It is a Malfunction, as the loss of productivity is incompatible with the primary function of the well.
 3. It achieves a state of &apos;Lost Productivity&apos; or &apos;Insufficient Flow&apos;, which is typically a DownState (inability to function due to external system factors like reservoir pressure, fluid properties, rather than an internal fault of the pipe/well structure itself). Since it achieves a DownState, not a Fault, it fits NonPerformanceEvent better than Failure.</rdfs:comment>
-        <www:MALFOachieves rdf:resource="https://www.w3id.org/MALFO#LostProductivityState"/>
     </owl:Class>
     
 
@@ -1302,7 +1297,6 @@ More precise definitions are left open to interpretation (e.g. through alignment
 1. It is a Process (the gradual build-up of inorganic deposits).
 2. It is NOT inherently a Malfunction itself (the process might occur without immediate functional incompatibility).
 3. It transitively positively causes a Failure: The scaling process leads to a restriction or blockage (a Failure event) which achieves the Fault state of &apos;PCK Blocked/Restricted by Scale&apos;. The state &apos;PCK is Scaled&apos; resulting from the process is a FailureCondition.</rdfs:comment>
-        <www:MALFOtransitivePosCauseOf rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
     </owl:Class>
     
 
@@ -1346,7 +1340,6 @@ More precise definitions are left open to interpretation (e.g. through alignment
 1. It is an Event (the unexpected closure).
 2. It is a Malfunction, as the closed valve is incompatible with the function of allowing production flow.
 3. It achieves a Fault: The state &apos;DHSV is Spontaneously Closed&apos; is a Fault because it&apos;s a state of inability to perform the function (allow flow) due to an internal occurrence (the spurious closure event) within the valve itself.</rdfs:comment>
-        <www:MALFOachieves rdf:resource="https://www.w3id.org/MALFO#DHSVClosedFault"/>
     </owl:Class>
     
 

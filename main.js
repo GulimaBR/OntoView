@@ -452,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Display equivalent classes
     if (classDetails.equivalentClasses && classDetails.equivalentClasses.length > 0) {
-      html += '<h4>Equivalent To</h4>';
+      html += '<h4>Equivalent To:</h4>';
       html += '<div class="equivalent-axiom">';
       classDetails.equivalentClasses.forEach(eq => {
         html += renderEquivalentAxiom(eq);
@@ -460,26 +460,26 @@ document.addEventListener('DOMContentLoaded', function() {
       html += '</div>';
     }
     
-    // Display object property relations
+    // Display restrictions
     if (classDetails.objectProperties && Object.keys(classDetails.objectProperties).length > 0) {
-      html += '<h4>Object Property Relationships:</h4><ul>';
+      html += '<h4>Restrictions:</h4><ul>';
       for (const [property, values] of Object.entries(classDetails.objectProperties)) {
         values.forEach(value => {
           if (typeof value === 'object' && value !== null && value.value) {
             const valueLabel = getLocalizedLabel(value.value);
             const typeLabel = value.type === 'only' ? 'only' : (value.type === 'some' ? 'some' : value.type);
-            html += `<li>${property} ${typeLabel} <a href="#" class="class-link" data-class="${value.value}">${valueLabel}</a></li>`;
+            html += `<li><a href="#" class="property-link" data-property="${property}">${property}</a> ${typeLabel} <a href="#" class="class-link" data-class="${value.value}">${valueLabel}</a></li>`;
           } else if (typeof value === 'string' && value && !value.startsWith('Domain of') && !value.startsWith('Range of')) {
             const valueLabel = getLocalizedLabel(value);
-            html += `<li>${property} only <a href="#" class="class-link" data-class="${value}">${valueLabel}</a></li>`;
+            html += `<li><a href="#" class="property-link" data-property="${property}">${property}</a> only <a href="#" class="class-link" data-class="${value}">${valueLabel}</a></li>`;
           }
         });
       }
       html += '</ul>';
     }
-    
+
     infoPanel.innerHTML = html;
-    
+
     // Add event listeners to class links
     document.querySelectorAll('.class-link').forEach(link => {
       link.addEventListener('click', function(e) {
@@ -487,6 +487,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const targetClass = this.getAttribute('data-class');
         lastSelectedClass = targetClass;
         showBranchOrFull(targetClass);
+      });
+    });
+    // Add event listeners to property links
+    document.querySelectorAll('.property-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const propName = this.getAttribute('data-property');
+        showPropertyComment(propName);
       });
     });
   }
@@ -605,14 +613,16 @@ document.addEventListener('DOMContentLoaded', function() {
       return '(not ' + renderEquivalentAxiom(eq.operand) + ')';
     } else if (eq.type === 'restriction') {
       let restrictionLabel = eq.restrictionType === 'some' ? 'some' : eq.restrictionType;
-      // If value is a named class, render as clickable
+      // Prepare the clickable property name
+      const propLink = `<a href="#" class="property-link" data-property="${eq.property}">${eq.property}</a>`;
+      // If value is a named class or nested axiom, render appropriately
       let valueRendered = '';
       if (typeof eq.value === 'object' && eq.value !== null) {
         valueRendered = renderEquivalentAxiom(eq.value);
       } else if (typeof eq.value === 'string' && eq.value) {
         valueRendered = `<span class=\"eq-class\"><a href=\"#\" class=\"class-link\" data-class=\"${eq.value}\">${getLocalizedLabel(eq.value)}</a></span>`;
       }
-      return `(${eq.property} <span class="eq-some">${restrictionLabel}</span> ${valueRendered})`;
+      return `(${propLink} <span class="eq-some">${restrictionLabel}</span> ${valueRendered})`;
     } else {
       return `<span class="eq-complex">?</span>`;
     }
@@ -1064,3 +1074,38 @@ document.addEventListener('DOMContentLoaded', function() {
     return { nodes, links };
   }
 });
+
+// Function to extract an object property's rdfs:comment
+function extractPropertyComment(propName) {
+  const xmlDoc = window.ontologyDoc;
+  if (!xmlDoc) return null;
+  const propEls = xmlDoc.querySelectorAll('owl\\:ObjectProperty, ObjectProperty');
+  for (const el of propEls) {
+    const about = el.getAttribute('rdf:about');
+    if (!about) continue;
+    const id = about.split('#').pop() || about.split('/').pop();
+    if (id === propName) {
+      const commentEl = el.querySelector('rdfs\\:comment, comment');
+      if (commentEl) {
+        return commentEl.textContent.trim();
+      }
+    }
+  }
+  return null;
+}
+
+// Function to display the property comment box
+function showPropertyComment(propName) {
+  const comment = extractPropertyComment(propName);
+  const infoPanel = document.getElementById('class-info');
+  const existing = document.getElementById('property-comment-box');
+  if (existing) existing.remove();
+  let commentHTML = `<div id="property-comment-box"><h4>Property Comment: ${propName}</h4>`;
+  if (comment) {
+    commentHTML += `<p>${comment}</p>`;
+  } else {
+    commentHTML += `<p>No comment available.</p>`;
+  }
+  commentHTML += `</div>`;
+  infoPanel.insertAdjacentHTML('beforeend', commentHTML);
+}
