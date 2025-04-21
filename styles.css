@@ -84,6 +84,40 @@ body {
   background-color: #3a7056;
 }
 
+/* Search Results Dropdown Styles */
+.search-results-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 250px;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 1000;
+  margin-top: 5px;
+  -webkit-overflow-scrolling: touch; /* Safari smooth scrolling */
+}
+
+.search-result-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  color: #333;
+  font-size: 14px;
+  display: block;
+  width: 100%;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-result-item:hover {
+  background-color: #f0f0f0;
+}
+
 .vis-container {
   display: flex;
   flex: 1;

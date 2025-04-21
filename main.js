@@ -179,84 +179,54 @@ document.addEventListener('DOMContentLoaded', function() {
         existingDropdown.remove();
       }
       
-      // Create dropdown container with positioning relative to the search container
+      // Create dropdown container using class-based styling
       const dropdown = document.createElement('div');
       dropdown.id = 'search-results';
       dropdown.className = 'search-results-dropdown';
       
-      // Style the dropdown
-      Object.assign(dropdown.style, {
-        position: 'absolute',
-        top: '100%',
-        left: '0',
-        width: '250px',
-        maxHeight: '300px',
-        overflowY: 'auto',
-        backgroundColor: 'white',
-        border: '1px solid #ccc',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-        zIndex: '1000',
-        marginTop: '5px'
-      });
+      // Make sure the search container has position relative
+      if (window.getComputedStyle(searchContainer).position !== 'relative') {
+        searchContainer.style.position = 'relative';
+      }
       
       // Add results to dropdown
       matches.forEach(match => {
         const resultItem = document.createElement('div');
         resultItem.className = 'search-result-item';
         
-        // Use innerText instead of textContent for better display
-        resultItem.innerText = match.name || match.id; 
+        // Use innerText for better cross-browser compatibility
+        resultItem.innerText = match.name || match.id;
         
-        // Style the result item with more explicit styles
-        Object.assign(resultItem.style, {
-          padding: '8px 12px',
-          cursor: 'pointer',
-          borderBottom: '1px solid #eee',
-          color: '#333',
-          fontSize: '14px',
-          display: 'block',
-          width: '100%',
-          textAlign: 'left',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis'
-        });
-        
-        // Add hover effect
-        resultItem.addEventListener('mouseover', () => {
-          resultItem.style.backgroundColor = '#f0f0f0';
-        });
-        resultItem.addEventListener('mouseout', () => {
-          resultItem.style.backgroundColor = 'white';
-        });
-        
-        // Click event
-        resultItem.addEventListener('click', function() {
+        // Safari-compatible click handler
+        resultItem.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
           lastSelectedClass = match.id;
           showBranchOrFull(match.id);
           dropdown.remove();
           console.log(`Selected class: ${match.id}`);
-        });
+          return false;
+        };
         
         dropdown.appendChild(resultItem);
       });
       
-      // Position the dropdown within the search container (better for GitHub Pages)
-      searchContainer.style.position = 'relative';
+      // Add the dropdown to the search container
       searchContainer.appendChild(dropdown);
       
-      // Close dropdown when clicking outside
-      function closeDropdown(e) {
+      // Safari-compatible global click handler
+      function handleGlobalClick(e) {
         if (!dropdown.contains(e.target) && e.target !== searchInput) {
           dropdown.remove();
-          document.removeEventListener('click', closeDropdown);
+          document.removeEventListener('click', handleGlobalClick, true);
         }
       }
       
-      // Use setTimeout to avoid immediate triggering
-      setTimeout(() => {
-        document.addEventListener('click', closeDropdown);
-      }, 100);
+      // Use requestAnimationFrame instead of setTimeout for better browser compatibility
+      requestAnimationFrame(() => {
+        // Use capture phase for better Safari event handling
+        document.addEventListener('click', handleGlobalClick, true);
+      });
       
       console.log('Search results dropdown created successfully');
     } catch (error) {
