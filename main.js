@@ -149,71 +149,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check for equivalentClass
         const eqClassElements = classEl.querySelectorAll('owl\\:equivalentClass, equivalentClass');
         eqClassElements.forEach(eqClass => {
-          const eqResource = eqClass.getAttribute('rdf:resource');
-          if (eqResource) {
-            const eqClassName = eqResource.split('#').pop() || eqResource.split('/').pop();
-            result.equivalentClasses.push({ type: 'named', value: eqClassName });
-          } else {
-            // Handle complex equivalence expressions (intersection, union, restriction)
-            const intersection = eqClass.querySelector('owl\\:intersectionOf, intersectionOf');
-            const union = eqClass.querySelector('owl\\:unionOf, unionOf');
-            if (intersection) {
-              const operands = Array.from(intersection.querySelectorAll('rdf\\:Description, Description, owl\\:Class, Class'))
-                .map(el => {
-                  const about = el.getAttribute('rdf:about');
-                  return about ? (about.split('#').pop() || about.split('/').pop()) : null;
-                })
-                .filter(Boolean);
-              result.equivalentClasses.push({ type: 'intersection', operands });
-            } else if (union) {
-              const operands = Array.from(union.querySelectorAll('rdf\\:Description, Description, owl\\:Class, Class'))
-                .map(el => {
-                  const about = el.getAttribute('rdf:about');
-                  return about ? (about.split('#').pop() || about.split('/').pop()) : null;
-                })
-                .filter(Boolean);
-              result.equivalentClasses.push({ type: 'union', operands });
-            } else {
-              // Try to parse restrictions
-              const restriction = eqClass.querySelector('owl\\:Restriction, Restriction');
-              if (restriction) {
-                // Get property
-                let onProperty = restriction.querySelector('owl\\:onProperty, onProperty');
-                let property = null;
-                if (onProperty) {
-                  const propDesc = onProperty.querySelector('rdf\\:Description, Description');
-                  if (propDesc) {
-                    const invOf = propDesc.querySelector('owl\\:inverseOf, inverseOf');
-                    if (invOf) {
-                      const invRes = invOf.getAttribute('rdf:resource');
-                      property = invRes ? `inverseOf(${invRes.split('#').pop() || invRes.split('/').pop()})` : null;
-                    }
-                  } else {
-                    property = onProperty.getAttribute('rdf:resource');
-                    property = property ? (property.split('#').pop() || property.split('/').pop()) : null;
-                  }
-                }
-                // Get someValuesFrom
-                let someValuesFrom = restriction.querySelector('owl\\:someValuesFrom, someValuesFrom');
-                let value = null;
-                if (someValuesFrom) {
-                  value = someValuesFrom.getAttribute('rdf:resource');
-                  value = value ? (value.split('#').pop() || value.split('/').pop()) : null;
-                }
-                // Get all restriction types (some, all, min, max, exact)
-                let restrictionType = 'some';
-                if (restriction.querySelector('owl\\:allValuesFrom, allValuesFrom')) restrictionType = 'only';
-                if (restriction.querySelector('owl\\:minCardinality, minCardinality')) restrictionType = 'min';
-                if (restriction.querySelector('owl\\:maxCardinality, maxCardinality')) restrictionType = 'max';
-                if (restriction.querySelector('owl\\:cardinality, cardinality')) restrictionType = 'exact';
-                result.equivalentClasses.push({ type: 'restriction', property, value, restrictionType });
-              } else {
-                result.equivalentClasses.push({ type: 'complex', value: eqClass.textContent.trim() });
-              }
-            }
+          // Find the first child (should be owl:Class or owl:Restriction)
+          let axiomNode = Array.from(eqClass.children).find(child => child.nodeType === 1);
+          if (axiomNode) {
+            const parsed = parseEquivalentClassAxiom(axiomNode);
+            if (parsed) result.equivalentClasses.push(parsed);
           }
         });
-        
         return;
       }
       
@@ -243,44 +185,37 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     if (targetClassElement) {
-      // Look for object property relationships
-      // This is more complex as we need to scan the entire document for properties that reference this class
-      const objectProperties = xmlDoc.querySelectorAll('owl\\:ObjectProperty, ObjectProperty');
-      objectProperties.forEach(propEl => {
-        const propAbout = propEl.getAttribute('rdf:about');
-        if (!propAbout) return;
-        
-        const propName = propAbout.split('#').pop() || propAbout.split('/').pop();
-        
-        // Check domain
-        const domainElements = propEl.querySelectorAll('rdfs\\:domain, domain');
-        domainElements.forEach(domainEl => {
-          const domainResource = domainEl.getAttribute('rdf:resource');
-          if (domainResource) {
-            const domainClassName = domainResource.split('#').pop() || domainResource.split('/').pop();
-            if (domainClassName === className) {
-              if (!result.objectProperties[propName]) {
-                result.objectProperties[propName] = [];
-              }
-              result.objectProperties[propName].push("Domain of this property");
-            }
+      // Find object property restrictions in rdfs:subClassOf
+      const subClassOfElements = targetClassElement.querySelectorAll('rdfs\\:subClassOf, subClassOf');
+      subClassOfElements.forEach(subClassEl => {
+        const restriction = subClassEl.querySelector('owl\\:Restriction, Restriction');
+        if (restriction) {
+          // Get property
+          let property = null;
+          let restrictionType = 'some';
+          let value = null;
+          const onProperty = restriction.querySelector('owl\\:onProperty, onProperty');
+          if (onProperty) {
+            property = onProperty.getAttribute('rdf:resource');
+            property = property ? (property.split('#').pop() || property.split('/').pop()) : null;
           }
-        });
-        
-        // Check range
-        const rangeElements = propEl.querySelectorAll('rdfs\\:range, range');
-        rangeElements.forEach(rangeEl => {
-          const rangeResource = rangeEl.getAttribute('rdf:resource');
-          if (rangeResource) {
-            const rangeClassName = rangeResource.split('#').pop() || rangeResource.split('/').pop();
-            if (rangeClassName === className) {
-              if (!result.objectProperties[propName]) {
-                result.objectProperties[propName] = [];
-              }
-              result.objectProperties[propName].push("Range of this property");
-            }
+          const someValuesFrom = restriction.querySelector('owl\\:someValuesFrom, someValuesFrom');
+          if (someValuesFrom) {
+            value = someValuesFrom.getAttribute('rdf:resource');
+            value = value ? (value.split('#').pop() || value.split('/').pop()) : null;
+            restrictionType = 'some';
           }
-        });
+          const allValuesFrom = restriction.querySelector('owl\\:allValuesFrom, allValuesFrom');
+          if (allValuesFrom) {
+            value = allValuesFrom.getAttribute('rdf:resource');
+            value = value ? (value.split('#').pop() || value.split('/').pop()) : null;
+            restrictionType = 'only';
+          }
+          if (property && value) {
+            if (!result.objectProperties[property]) result.objectProperties[property] = [];
+            result.objectProperties[property].push({ type: restrictionType, value });
+          }
+        }
       });
       
       // Look for annotation properties related to this class
@@ -520,25 +455,7 @@ document.addEventListener('DOMContentLoaded', function() {
       html += '<h4>Equivalent To</h4>';
       html += '<div class="equivalent-axiom">';
       classDetails.equivalentClasses.forEach(eq => {
-        if (eq.type === 'named') {
-          const eqClassLabel = getLocalizedLabel(eq.value);
-          html += `<span class="eq-class"><a href="#" class="class-link" data-class="${eq.value}">${eqClassLabel}</a></span> `;
-        } else if (eq.type === 'intersection') {
-          html += eq.operands.map(op => {
-            const opLabel = getLocalizedLabel(op);
-            return `<span class="eq-class"><a href="#" class="class-link" data-class="${op}">${opLabel}</a></span>`;
-          }).join(' <span class="eq-and">and</span> ');
-        } else if (eq.type === 'union') {
-          html += eq.operands.map(op => {
-            const opLabel = getLocalizedLabel(op);
-            return `<span class="eq-class"><a href="#" class="class-link" data-class="${op}">${opLabel}</a></span>`;
-          }).join(' <span class="eq-or">or</span> ');
-        } else if (eq.type === 'restriction') {
-          let restrictionLabel = eq.restrictionType === 'some' ? 'some' : eq.restrictionType;
-          html += `<span class="eq-restriction">(${eq.property} <span class="eq-some">${restrictionLabel}</span> ${getLocalizedLabel(eq.value)})</span> `;
-        } else {
-          html += `<span class="eq-complex">${eq.value}</span> `;
-        }
+        html += renderEquivalentAxiom(eq);
       });
       html += '</div>';
     }
@@ -547,17 +464,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (classDetails.objectProperties && Object.keys(classDetails.objectProperties).length > 0) {
       html += '<h4>Object Property Relationships:</h4><ul>';
       for (const [property, values] of Object.entries(classDetails.objectProperties)) {
-        html += `<li><strong>${property}:</strong><ul>`;
         values.forEach(value => {
-          // If the value is a class name (not a descriptive text like "Domain of this property")
-          if (!value.startsWith("Domain of") && !value.startsWith("Range of")) {
+          if (typeof value === 'object' && value !== null && value.value) {
+            const valueLabel = getLocalizedLabel(value.value);
+            const typeLabel = value.type === 'only' ? 'only' : (value.type === 'some' ? 'some' : value.type);
+            html += `<li>${property} ${typeLabel} <a href="#" class="class-link" data-class="${value.value}">${valueLabel}</a></li>`;
+          } else if (typeof value === 'string' && value && !value.startsWith('Domain of') && !value.startsWith('Range of')) {
             const valueLabel = getLocalizedLabel(value);
-            html += `<li><a href="#" class="class-link" data-class="${value}">${valueLabel}</a></li>`;
-          } else {
-            html += `<li>${value}</li>`;
+            html += `<li>${property} only <a href="#" class="class-link" data-class="${value}">${valueLabel}</a></li>`;
           }
         });
-        html += `</ul></li>`;
       }
       html += '</ul>';
     }
@@ -573,6 +489,133 @@ document.addEventListener('DOMContentLoaded', function() {
         showBranchOrFull(targetClass);
       });
     });
+  }
+
+  // --- Recursive parser for equivalentClass axioms ---
+  function parseEquivalentClassAxiom(node) {
+    if (!node) return null;
+    // Named class
+    if ((node.nodeName.endsWith('Class') || node.nodeName.endsWith('Description')) && node.getAttribute('rdf:about')) {
+      const about = node.getAttribute('rdf:about');
+      return { type: 'named', value: about.split('#').pop() || about.split('/').pop() };
+    }
+    // Intersection (AND)
+    const intersection = node.querySelector(':scope > owl\\:intersectionOf, :scope > intersectionOf');
+    if (intersection) {
+      // Support both rdf:Description/Description and owl:Class/Class children
+      const items = Array.from(intersection.children).map(parseEquivalentClassAxiom).filter(Boolean);
+      return { type: 'intersection', operands: items };
+    }
+    // Union (OR)
+    const union = node.querySelector(':scope > owl\\:unionOf, :scope > unionOf');
+    if (union) {
+      const items = Array.from(union.children).map(parseEquivalentClassAxiom).filter(Boolean);
+      return { type: 'union', operands: items };
+    }
+    // Complement (NOT)
+    const complement = node.querySelector(':scope > owl\\:complementOf, :scope > complementOf');
+    if (complement) {
+      // complementOf can be a resource or a child node
+      const resource = complement.getAttribute('rdf:resource');
+      if (resource) {
+        return { type: 'not', operand: { type: 'named', value: resource.split('#').pop() || resource.split('/').pop() } };
+      } else {
+        // Try to find a child node
+        const child = Array.from(complement.children).find(child => child.nodeType === 1);
+        if (child) {
+          return { type: 'not', operand: parseEquivalentClassAxiom(child) };
+        }
+      }
+      // If nothing found, still return not with empty operand
+      return { type: 'not', operand: null };
+    }
+    // Restriction
+    if (node.nodeName.endsWith('Restriction')) {
+      let property = null;
+      let restrictionType = 'some';
+      let value = null;
+      const onProperty = node.querySelector(':scope > owl\\:onProperty, :scope > onProperty');
+      if (onProperty) {
+        // Check for inverseOf
+        const propDesc = onProperty.querySelector(':scope > rdf\\:Description, :scope > Description');
+        if (propDesc) {
+          const invOf = propDesc.querySelector(':scope > owl\\:inverseOf, :scope > inverseOf');
+          if (invOf) {
+            const invRes = invOf.getAttribute('rdf:resource');
+            property = invRes ? `inverse(${invRes.split('#').pop() || invRes.split('/').pop()})` : null;
+          }
+          // If not inverseOf, check for nested restriction property (for nested restrictions as value)
+          if (!property) {
+            // If the property is a restriction, parse recursively
+            const nestedRestriction = propDesc.querySelector(':scope > owl\\:Restriction, :scope > Restriction');
+            if (nestedRestriction) {
+              // Recursively parse the nested restriction as the value
+              value = parseEquivalentClassAxiom(nestedRestriction);
+            }
+          }
+        }
+        if (!property) {
+          property = onProperty.getAttribute('rdf:resource');
+          property = property ? (property.split('#').pop() || property.split('/').pop()) : null;
+        }
+      }
+      // If value is not set by nested restriction, check for someValuesFrom/allValuesFrom
+      if (!value) {
+        const someValuesFrom = node.querySelector(':scope > owl\\:someValuesFrom, :scope > someValuesFrom');
+        if (someValuesFrom) {
+          // If someValuesFrom is a restriction, parse recursively
+          const nestedRestriction = someValuesFrom.querySelector(':scope > owl\\:Restriction, :scope > Restriction');
+          if (nestedRestriction) {
+            value = parseEquivalentClassAxiom(nestedRestriction);
+          } else {
+            const v = someValuesFrom.getAttribute('rdf:resource');
+            value = v ? (v.split('#').pop() || v.split('/').pop()) : null;
+          }
+          restrictionType = 'some';
+        }
+        const allValuesFrom = node.querySelector(':scope > owl\\:allValuesFrom, :scope > allValuesFrom');
+        if (allValuesFrom) {
+          const nestedRestriction = allValuesFrom.querySelector(':scope > owl\\:Restriction, :scope > Restriction');
+          if (nestedRestriction) {
+            value = parseEquivalentClassAxiom(nestedRestriction);
+          } else {
+            const v = allValuesFrom.getAttribute('rdf:resource');
+            value = v ? (v.split('#').pop() || v.split('/').pop()) : null;
+          }
+          restrictionType = 'only';
+        }
+      }
+      // Cardinality restrictions can be added here if needed
+      return { type: 'restriction', property, value, restrictionType };
+    }
+    return null;
+  }
+
+  // --- Recursive renderer for equivalentClass axioms ---
+  function renderEquivalentAxiom(eq) {
+    if (!eq) return '';
+    if (eq.type === 'named') {
+      const eqClassLabel = getLocalizedLabel(eq.value);
+      return `<span class="eq-class"><a href="#" class="class-link" data-class="${eq.value}">${eqClassLabel}</a></span>`;
+    } else if (eq.type === 'intersection') {
+      return eq.operands.map(renderEquivalentAxiom).join(' <span class="eq-and">and</span> ');
+    } else if (eq.type === 'union') {
+      return '(' + eq.operands.map(renderEquivalentAxiom).join(' <span class="eq-or">or</span> ') + ')';
+    } else if (eq.type === 'not') {
+      return '(not ' + renderEquivalentAxiom(eq.operand) + ')';
+    } else if (eq.type === 'restriction') {
+      let restrictionLabel = eq.restrictionType === 'some' ? 'some' : eq.restrictionType;
+      // If value is a named class, render as clickable
+      let valueRendered = '';
+      if (typeof eq.value === 'object' && eq.value !== null) {
+        valueRendered = renderEquivalentAxiom(eq.value);
+      } else if (typeof eq.value === 'string' && eq.value) {
+        valueRendered = `<span class=\"eq-class\"><a href=\"#\" class=\"class-link\" data-class=\"${eq.value}\">${getLocalizedLabel(eq.value)}</a></span>`;
+      }
+      return `(${eq.property} <span class="eq-some">${restrictionLabel}</span> ${valueRendered})`;
+    } else {
+      return `<span class="eq-complex">?</span>`;
+    }
   }
 
   // Create D3 visualization
