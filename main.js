@@ -36,6 +36,134 @@ document.addEventListener('DOMContentLoaded', function() {
   // Load default ontology on page load
   loadDefaultOntology();
   
+  // Add search functionality
+  const searchInput = document.getElementById('class-search');
+  const searchButton = document.getElementById('search-button');
+  
+  // Search button click event
+  searchButton.addEventListener('click', performSearch);
+  
+  // Enter key in search input
+  searchInput.addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      performSearch();
+    }
+  });
+  
+  // Function to perform the search
+  function performSearch() {
+    const query = searchInput.value.trim().toLowerCase();
+    if (!query) return;
+    
+    if (!globalVisualizationState.treeData) {
+      alert('No ontology loaded yet.');
+      return;
+    }
+    
+    const matches = findClassesByQuery(query);
+    
+    if (matches.length === 0) {
+      alert(`No classes found matching "${query}"`);
+    } else if (matches.length === 1) {
+      // If only one match, focus on it directly
+      lastSelectedClass = matches[0].id;
+      showBranchOrFull(matches[0].id);
+    } else {
+      // Multiple matches, show dropdown
+      showSearchResults(matches, searchInput);
+    }
+  }
+  
+  // Function to find classes matching a query
+  function findClassesByQuery(query) {
+    const allNodes = Array.from(globalVisualizationState.treeData.descendants());
+    return allNodes.filter(node => {
+      // Skip OntologyRoot
+      if (node.data.id === "OntologyRoot") return false;
+      
+      // Check if name or ID contains the search query
+      const nameMatch = node.data.name && node.data.name.toLowerCase().includes(query);
+      const idMatch = node.data.id && node.data.id.toLowerCase().includes(query);
+      
+      // Check labels in all languages
+      let labelMatch = false;
+      if (node.data.labels) {
+        labelMatch = Object.values(node.data.labels).some(label => 
+          label.toLowerCase().includes(query)
+        );
+      }
+      
+      return nameMatch || idMatch || labelMatch;
+    }).map(node => node.data);
+  }
+  
+  // Function to display search results dropdown
+  function showSearchResults(matches, inputElement) {
+    // Remove any existing dropdown
+    const existingDropdown = document.getElementById('search-results');
+    if (existingDropdown) {
+      existingDropdown.remove();
+    }
+    
+    // Get position of input element
+    const rect = inputElement.getBoundingClientRect();
+    
+    // Create dropdown container
+    const dropdown = document.createElement('div');
+    dropdown.id = 'search-results';
+    dropdown.className = 'search-results-dropdown';
+    dropdown.style.position = 'absolute';
+    dropdown.style.top = `${rect.bottom}px`;
+    dropdown.style.left = `${rect.left}px`;
+    dropdown.style.width = `${Math.max(200, rect.width)}px`;
+    dropdown.style.maxHeight = '300px';
+    dropdown.style.overflowY = 'auto';
+    dropdown.style.backgroundColor = 'white';
+    dropdown.style.border = '1px solid #ccc';
+    dropdown.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    dropdown.style.zIndex = '1000';
+    
+    // Add results to dropdown
+    matches.forEach(match => {
+      const resultItem = document.createElement('div');
+      resultItem.className = 'search-result-item';
+      resultItem.textContent = match.name;
+      resultItem.style.padding = '8px 12px';
+      resultItem.style.cursor = 'pointer';
+      resultItem.style.borderBottom = '1px solid #eee';
+      resultItem.style.transition = 'background-color 0.2s';
+      
+      // Hover effect
+      resultItem.addEventListener('mouseover', () => {
+        resultItem.style.backgroundColor = '#f0f0f0';
+      });
+      resultItem.addEventListener('mouseout', () => {
+        resultItem.style.backgroundColor = 'white';
+      });
+      
+      // Click event
+      resultItem.addEventListener('click', () => {
+        lastSelectedClass = match.id;
+        showBranchOrFull(match.id);
+        dropdown.remove();
+      });
+      
+      dropdown.appendChild(resultItem);
+    });
+    
+    // Add dropdown to document
+    document.body.appendChild(dropdown);
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function closeDropdown(e) {
+      if (!dropdown.contains(e.target) && e.target !== inputElement) {
+        dropdown.remove();
+        document.removeEventListener('click', closeDropdown);
+      }
+    });
+  }
+  
   // Handle file upload
   function handleFileUpload(event) {
     const file = event.target.files[0];
