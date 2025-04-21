@@ -339,34 +339,26 @@ document.addEventListener('DOMContentLoaded', function() {
     );
     
     if (matchingNode.size() > 0) {
-      // Get the first matching node (should be only one)
+      // Get the first matching node
       const node = matchingNode.datum();
-      
-      // Use a fixed scale that works well for viewing a single node
-      const scale = 1.5;
-      
-      // Get selected layout direction
-      const isVertical = document.getElementById('layout-direction').value === 'vertical';
-      
-      // Calculate the translation needed to center this node based on layout direction
-      let x, y;
-      
-      if (isVertical) {
-        // For vertical layout, x and y are not swapped
-        x = globalVisualizationState.width / 2 - node.x * scale;
-        y = globalVisualizationState.height / 3 - node.y * scale; // Position a bit higher than center
-      } else {
-        // For horizontal layout, x and y are swapped
-        x = globalVisualizationState.width / 3 - node.y * scale; // Position more to the left
-        y = globalVisualizationState.height / 2 - node.x * scale;
-      }
-      
-      // Apply smooth transition to center the node
-      globalVisualizationState.svg.transition()
-        .duration(750)
-        .call(globalVisualizationState.zoom.transform, 
-              d3.zoomIdentity.translate(x, y).scale(scale));
-      
+      const svg = globalVisualizationState.svg;
+      const zoomBehavior = globalVisualizationState.zoom;
+      const targetScale = 1.5; // Desired zoom level
+
+      // Target node coordinates (layout coordinates from d3.tree)
+      const targetX = node.x;
+      const targetY = node.y;
+
+      // Use a D3 transition to smoothly move and scale the view
+      // zoom.translateTo centers the view on the given data coordinates (targetX, targetY)
+      // zoom.scaleTo adjusts the scale
+      // D3 handles the interpolation from the current transform state automatically.
+      svg.transition()
+          .duration(750) // Standard transition duration
+          .call(zoomBehavior.translateTo, targetX, targetY)
+          .transition() // Chain another transition for scaling if needed, or combine
+          .call(zoomBehavior.scaleTo, targetScale);
+
       // Highlight the node
       globalVisualizationState.nodeElements.classed('selected', false);
       matchingNode.classed('selected', true);
@@ -648,22 +640,30 @@ document.addEventListener('DOMContentLoaded', function() {
       .append('svg')
       .attr('width', width)
       .attr('height', height);
+
+    // Define the initial transform for the 'g' element
+    const initialTranslateX = width / 2;
+    const initialTranslateY = 60;
+    const initialTransform = d3.zoomIdentity.translate(initialTranslateX, initialTranslateY);
+
+    // Create the main group element FIRST and apply the initial transform
+    const g = svg.append('g')
+      .attr('transform', initialTransform);
     
-    // Create zoom behavior
+    // Create zoom behavior - now it can safely reference 'g'
     const zoom = d3.zoom()
       .on('zoom', function(event) {
         g.attr('transform', event.transform);
       });
     
-    // Apply zoom to SVG
-    svg.call(zoom);
+    // Apply zoom to SVG and explicitly set the initial zoom state
+    // This will trigger the zoom handler, which now safely references 'g'
+    svg.call(zoom)
+       .call(zoom.transform, initialTransform); 
     
-    const g = svg.append('g')
-      .attr('transform', `translate(${width/2}, ${60})`); // Position at top center
-      
     // Store references in global state
     globalVisualizationState.svg = svg;
-    globalVisualizationState.g = g;
+    globalVisualizationState.g = g; // g is already defined
     globalVisualizationState.zoom = zoom;
     
     // Create a hierarchy from the data
@@ -983,53 +983,47 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         d.y = event.x + d.dragOffsetX;
         d.x = event.y + d.dragOffsetY;
-        }
+      }
       
-      // Update node position
+      // Update dragged node position
       d3.select(this).attr("transform", isVertical 
         ? `translate(${d.x}, ${d.y})` 
         : `translate(${d.y}, ${d.x})`);
       
-      // Update links
-      link.attr('d', link => {
-        if (isVertical) {
-          // Vertical layout
-          if (link.source === d) {
-            return `M${d.x},${d.y}
-                    C${d.x},${(d.y + link.target.y) / 2}
-                     ${link.target.x},${(d.y + link.target.y) / 2}
-                     ${link.target.x},${d.target.y}`;
-          } else if (link.target === d) {
-            return `M${link.source.x},${link.source.y}
-                    C${link.source.x},${(link.source.y + d.y) / 2}
-                     ${d.x},${(link.source.y + d.y) / 2}
-                     ${d.x},${d.y}`;
-          } else {
-            return `M${link.source.x},${link.source.y}
-                    C${link.source.x},${(link.source.y + link.target.y) / 2}
-                     ${link.target.x},${(link.source.y + link.target.y) / 2}
-                     ${link.target.x},${link.target.y}`;
-          }
-        } else {
-          // Horizontal layout
-          if (link.source === d) {
-            return `M${d.y},${d.x}
-                    C${(d.y + link.target.y) / 2},${d.x}
-                     ${(d.y + link.target.y) / 2},${link.target.x}
-                     ${d.target.y},${d.target.x}`;
-          } else if (link.target === d) {
-            return `M${link.source.y},${link.source.x}
-                    C${(link.source.y + d.y) / 2},${link.source.x}
-                     ${(link.source.y + d.y) / 2},${d.x}
-                     ${d.y},${d.x}`;
-          } else {
-            return `M${link.source.y},${link.source.x}
-                    C${(link.source.y + link.target.y) / 2},${link.source.x}
-                     ${(link.source.y + link.target.y) / 2},${link.target.x}
-                     ${link.target.y},${link.target.x}`;
-          }
-        }
-      });
+      // Update links connected to the dragged node
+      link.filter(linkData => linkData.source === d || linkData.target === d)
+          .attr('d', linkData => {
+              // Use the updated coordinates for the dragged node (d)
+              // and the existing coordinates for the other end.
+              const sourceNode = linkData.source;
+              const targetNode = linkData.target;
+
+              // Get coordinates, using the dragged node's updated position
+              const sourceX = sourceNode === d ? d.x : sourceNode.x;
+              const sourceY = sourceNode === d ? d.y : sourceNode.y;
+              const targetX = targetNode === d ? d.x : targetNode.x;
+              const targetY = targetNode === d ? d.y : targetNode.y;
+
+              // Add a check for missing coordinates
+              if (sourceX === undefined || sourceY === undefined || targetX === undefined || targetY === undefined) {
+                  console.warn("Skipping link draw due to missing coordinates", linkData);
+                  return "M0,0"; // Return a minimal path to avoid error
+              }
+
+              if (isVertical) {
+                  // Vertical layout path calculation
+                  return `M${sourceX},${sourceY}
+                          C${sourceX},${(sourceY + targetY) / 2}
+                           ${targetX},${(sourceY + targetY) / 2}
+                           ${targetX},${targetY}`;
+              } else {
+                  // Horizontal layout path calculation (swap x and y)
+                  return `M${sourceY},${sourceX}
+                          C${(sourceY + targetY) / 2},${sourceX}
+                           ${(sourceY + targetY) / 2},${targetX}
+                           ${targetY},${targetX}`;
+              }
+          });
     }
     
     function dragended(event, d) {
