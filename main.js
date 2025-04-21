@@ -98,14 +98,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Helper to show branch or full view
   function showBranchOrFull(className) {
-    if (branchViewActive && className) {
-      const branchData = getBranchOntologyData(fullOntologyData, className);
-      createVisualization(branchData);
-      // Focus and show info for the selected class
+    // Only recreate visualization if we're changing view modes or data hasn't been visualized yet
+    const needsRecreation = !globalVisualizationState.treeData || 
+                           (branchViewActive && className && !lastBranchClassName) ||
+                           (!branchViewActive && lastBranchClassName);
+    
+    // Track if we're in branch view and which class is being shown
+    window.lastBranchClassName = branchViewActive ? className : null;
+    
+    if (needsRecreation) {
+      if (branchViewActive && className) {
+        const branchData = getBranchOntologyData(fullOntologyData, className);
+        createVisualization(branchData);
+      } else {
+        createVisualization(fullOntologyData);
+      }
+      // Focus will be handled after visualization is created
       setTimeout(() => focusOnClass(className), 100);
     } else {
-      createVisualization(fullOntologyData);
-      setTimeout(() => focusOnClass(className), 100);
+      // Just focus on the class without recreating the visualization
+      focusOnClass(className);
     }
   }
 
@@ -344,20 +356,36 @@ document.addEventListener('DOMContentLoaded', function() {
       const svg = globalVisualizationState.svg;
       const zoomBehavior = globalVisualizationState.zoom;
       const targetScale = 1.5; // Desired zoom level
-
+      
+      // Get the current transform state
+      const currentTransform = d3.zoomTransform(svg.node());
+      
+      // Check if current layout is vertical or horizontal
+      const isVertical = document.getElementById('layout-direction').value === 'vertical';
+      
       // Target node coordinates (layout coordinates from d3.tree)
-      const targetX = node.x;
-      const targetY = node.y;
-
-      // Use a D3 transition to smoothly move and scale the view
-      // zoom.translateTo centers the view on the given data coordinates (targetX, targetY)
-      // zoom.scaleTo adjusts the scale
-      // D3 handles the interpolation from the current transform state automatically.
+      // Use the proper coordinates based on layout direction
+      const targetX = isVertical ? node.x : node.y;
+      const targetY = isVertical ? node.y : node.x;
+      
+      // Get the width and height of the container
+      const width = globalVisualizationState.width;
+      const height = globalVisualizationState.height;
+      
+      // Calculate the transform that centers the node
+      // For this we need to transform the node coordinates to screen coordinates
+      const newX = width / 2 - targetX * targetScale;
+      const newY = height / 2 - targetY * targetScale;
+      
+      // Create a new transform that centers on the node with the desired scale
+      const newTransform = d3.zoomIdentity
+        .translate(newX, newY)
+        .scale(targetScale);
+      
+      // Transition to the new transform
       svg.transition()
-          .duration(750) // Standard transition duration
-          .call(zoomBehavior.translateTo, targetX, targetY)
-          .transition() // Chain another transition for scaling if needed, or combine
-          .call(zoomBehavior.scaleTo, targetScale);
+        .duration(750)
+        .call(zoomBehavior.transform, newTransform);
 
       // Highlight the node
       globalVisualizationState.nodeElements.classed('selected', false);
@@ -957,8 +985,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add click event to nodes
     node.on('click', function(event, d) {
       if (d.data.id === "OntologyRoot") return;
+      
+      // Store the last selected class ID
       lastSelectedClass = d.data.id;
-      showBranchOrFull(d.data.id);
+      
+      // Only update visualization if branch view is active and should change
+      const shouldChangeVisualization = branchViewActive && !event.ctrlKey && !event.metaKey;
+      
+      if (shouldChangeVisualization) {
+        // If branch view is active, we regenerate the visualization
+        const branchData = getBranchOntologyData(fullOntologyData, d.data.id);
+        createVisualization(branchData);
+        // Focus will be handled by the createVisualization callback
+      } else {
+        // Otherwise just focus on the class and display info without regenerating
+        focusOnClass(d.data.id);
+        displayClassInfo(d);
+      }
     });
     
     // Drag functions
