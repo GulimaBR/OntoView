@@ -36,132 +36,195 @@ document.addEventListener('DOMContentLoaded', function() {
   // Load default ontology on page load
   loadDefaultOntology();
   
-  // Add search functionality
-  const searchInput = document.getElementById('class-search');
-  const searchButton = document.getElementById('search-button');
-  
-  // Search button click event
-  searchButton.addEventListener('click', performSearch);
-  
-  // Enter key in search input
-  searchInput.addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      performSearch();
-    }
+  // Add search functionality - with improved GitHub Pages compatibility
+  document.addEventListener('DOMContentLoaded', function() {
+    // Wait until DOM is fully loaded to initialize search
+    initializeSearch();
   });
+  
+  function initializeSearch() {
+    try {
+      const searchInput = document.getElementById('class-search');
+      const searchButton = document.getElementById('search-button');
+      
+      if (!searchInput || !searchButton) {
+        console.error('Search elements not found in DOM');
+        return;
+      }
+      
+      // Search button click event
+      searchButton.addEventListener('click', performSearch);
+      
+      // Enter key in search input
+      searchInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          performSearch();
+        }
+      });
+      
+      // Log successful initialization
+      console.log('Search functionality initialized successfully');
+    } catch (error) {
+      console.error('Error initializing search:', error);
+    }
+  }
   
   // Function to perform the search
   function performSearch() {
-    const query = searchInput.value.trim().toLowerCase();
-    if (!query) return;
-    
-    if (!globalVisualizationState.treeData) {
-      alert('No ontology loaded yet.');
-      return;
-    }
-    
-    const matches = findClassesByQuery(query);
-    
-    if (matches.length === 0) {
-      alert(`No classes found matching "${query}"`);
-    } else if (matches.length === 1) {
-      // If only one match, focus on it directly
-      lastSelectedClass = matches[0].id;
-      showBranchOrFull(matches[0].id);
-    } else {
-      // Multiple matches, show dropdown
-      showSearchResults(matches, searchInput);
+    try {
+      const searchInput = document.getElementById('class-search');
+      if (!searchInput) {
+        console.error('Search input not found');
+        return;
+      }
+      
+      const query = searchInput.value.trim().toLowerCase();
+      if (!query) {
+        console.log('Empty search query');
+        return;
+      }
+      
+      // Check if visualization data is available
+      if (!globalVisualizationState || !globalVisualizationState.treeData) {
+        console.error('Visualization data not available');
+        alert('No ontology loaded yet.');
+        return;
+      }
+      
+      const matches = findClassesByQuery(query);
+      console.log(`Found ${matches.length} matches for query: "${query}"`);
+      
+      if (matches.length === 0) {
+        alert(`No classes found matching "${query}"`);
+      } else if (matches.length === 1) {
+        // If only one match, focus on it directly
+        lastSelectedClass = matches[0].id;
+        showBranchOrFull(matches[0].id);
+      } else {
+        // Multiple matches, show dropdown
+        showSearchResults(matches);
+      }
+    } catch (error) {
+      console.error('Error performing search:', error);
     }
   }
   
   // Function to find classes matching a query
   function findClassesByQuery(query) {
-    const allNodes = Array.from(globalVisualizationState.treeData.descendants());
-    return allNodes.filter(node => {
-      // Skip OntologyRoot
-      if (node.data.id === "OntologyRoot") return false;
-      
-      // Check if name or ID contains the search query
-      const nameMatch = node.data.name && node.data.name.toLowerCase().includes(query);
-      const idMatch = node.data.id && node.data.id.toLowerCase().includes(query);
-      
-      // Check labels in all languages
-      let labelMatch = false;
-      if (node.data.labels) {
-        labelMatch = Object.values(node.data.labels).some(label => 
-          label.toLowerCase().includes(query)
-        );
+    try {
+      if (!globalVisualizationState || !globalVisualizationState.treeData) {
+        console.error('Tree data not available for search');
+        return [];
       }
       
-      return nameMatch || idMatch || labelMatch;
-    }).map(node => node.data);
+      const allNodes = Array.from(globalVisualizationState.treeData.descendants());
+      return allNodes.filter(node => {
+        // Skip OntologyRoot
+        if (!node.data || node.data.id === "OntologyRoot") return false;
+        
+        // Check if name or ID contains the search query
+        const nameMatch = node.data.name && node.data.name.toLowerCase().includes(query);
+        const idMatch = node.data.id && node.data.id.toLowerCase().includes(query);
+        
+        // Check labels in all languages
+        let labelMatch = false;
+        if (node.data.labels) {
+          labelMatch = Object.values(node.data.labels).some(label => 
+            label.toLowerCase().includes(query)
+          );
+        }
+        
+        return nameMatch || idMatch || labelMatch;
+      }).map(node => node.data);
+    } catch (error) {
+      console.error('Error finding classes by query:', error);
+      return [];
+    }
   }
   
   // Function to display search results dropdown
-  function showSearchResults(matches, inputElement) {
-    // Remove any existing dropdown
-    const existingDropdown = document.getElementById('search-results');
-    if (existingDropdown) {
-      existingDropdown.remove();
-    }
-    
-    // Get position of input element
-    const rect = inputElement.getBoundingClientRect();
-    
-    // Create dropdown container
-    const dropdown = document.createElement('div');
-    dropdown.id = 'search-results';
-    dropdown.className = 'search-results-dropdown';
-    dropdown.style.position = 'absolute';
-    dropdown.style.top = `${rect.bottom}px`;
-    dropdown.style.left = `${rect.left}px`;
-    dropdown.style.width = `${Math.max(200, rect.width)}px`;
-    dropdown.style.maxHeight = '300px';
-    dropdown.style.overflowY = 'auto';
-    dropdown.style.backgroundColor = 'white';
-    dropdown.style.border = '1px solid #ccc';
-    dropdown.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-    dropdown.style.zIndex = '1000';
-    
-    // Add results to dropdown
-    matches.forEach(match => {
-      const resultItem = document.createElement('div');
-      resultItem.className = 'search-result-item';
-      resultItem.textContent = match.name;
-      resultItem.style.padding = '8px 12px';
-      resultItem.style.cursor = 'pointer';
-      resultItem.style.borderBottom = '1px solid #eee';
-      resultItem.style.transition = 'background-color 0.2s';
+  function showSearchResults(matches) {
+    try {
+      const searchInput = document.getElementById('class-search');
+      const searchContainer = searchInput.closest('.search-box');
       
-      // Hover effect
-      resultItem.addEventListener('mouseover', () => {
-        resultItem.style.backgroundColor = '#f0f0f0';
-      });
-      resultItem.addEventListener('mouseout', () => {
-        resultItem.style.backgroundColor = 'white';
-      });
-      
-      // Click event
-      resultItem.addEventListener('click', () => {
-        lastSelectedClass = match.id;
-        showBranchOrFull(match.id);
-        dropdown.remove();
-      });
-      
-      dropdown.appendChild(resultItem);
-    });
-    
-    // Add dropdown to document
-    document.body.appendChild(dropdown);
-    
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function closeDropdown(e) {
-      if (!dropdown.contains(e.target) && e.target !== inputElement) {
-        dropdown.remove();
-        document.removeEventListener('click', closeDropdown);
+      if (!searchInput || !searchContainer) {
+        console.error('Search container elements not found');
+        return;
       }
-    });
+      
+      // Remove any existing dropdown
+      const existingDropdown = document.getElementById('search-results');
+      if (existingDropdown) {
+        existingDropdown.remove();
+      }
+      
+      // Create dropdown container with positioning relative to the search container
+      const dropdown = document.createElement('div');
+      dropdown.id = 'search-results';
+      dropdown.className = 'search-results-dropdown';
+      
+      // Style the dropdown
+      Object.assign(dropdown.style, {
+        position: 'absolute',
+        top: '100%',
+        left: '0',
+        width: '250px',
+        maxHeight: '300px',
+        overflowY: 'auto',
+        backgroundColor: 'white',
+        border: '1px solid #ccc',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+        zIndex: '1000',
+        marginTop: '5px'
+      });
+      
+      // Add results to dropdown
+      matches.forEach(match => {
+        const resultItem = document.createElement('div');
+        resultItem.className = 'search-result-item';
+        resultItem.textContent = match.name || match.id;
+        
+        // Style the result item
+        Object.assign(resultItem.style, {
+          padding: '8px 12px',
+          cursor: 'pointer',
+          borderBottom: '1px solid #eee'
+        });
+        
+        // Click event
+        resultItem.addEventListener('click', function() {
+          lastSelectedClass = match.id;
+          showBranchOrFull(match.id);
+          dropdown.remove();
+          console.log(`Selected class: ${match.id}`);
+        });
+        
+        dropdown.appendChild(resultItem);
+      });
+      
+      // Position the dropdown within the search container (better for GitHub Pages)
+      searchContainer.style.position = 'relative';
+      searchContainer.appendChild(dropdown);
+      
+      // Close dropdown when clicking outside
+      function closeDropdown(e) {
+        if (!dropdown.contains(e.target) && e.target !== searchInput) {
+          dropdown.remove();
+          document.removeEventListener('click', closeDropdown);
+        }
+      }
+      
+      // Use setTimeout to avoid immediate triggering
+      setTimeout(() => {
+        document.addEventListener('click', closeDropdown);
+      }, 100);
+      
+      console.log('Search results dropdown created successfully');
+    } catch (error) {
+      console.error('Error showing search results:', error);
+    }
   }
   
   // Handle file upload
