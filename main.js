@@ -37,10 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
   loadDefaultOntology();
   
   // Add search functionality - with improved GitHub Pages compatibility
-  document.addEventListener('DOMContentLoaded', function() {
-    // Wait until DOM is fully loaded to initialize search
-    initializeSearch();
-  });
+  initializeSearch();
   
   function initializeSearch() {
     try {
