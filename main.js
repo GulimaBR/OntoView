@@ -77,7 +77,39 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   }
   
-  // Process ontology data and create visualization
+  // --- Branch View Toggle State ---
+  let branchViewActive = false;
+  let lastSelectedClass = null;
+  let fullOntologyData = null;
+
+  // Listen for branch view toggle
+  const toggle = document.getElementById('toggle-branch-view');
+  if (toggle) {
+    toggle.addEventListener('change', function() {
+      branchViewActive = toggle.checked;
+      if (lastSelectedClass) {
+        showBranchOrFull(lastSelectedClass);
+      } else {
+        // If no class selected, just reload full ontology
+        createVisualization(fullOntologyData);
+      }
+    });
+  }
+
+  // Helper to show branch or full view
+  function showBranchOrFull(className) {
+    if (branchViewActive && className) {
+      const branchData = getBranchOntologyData(fullOntologyData, className);
+      createVisualization(branchData);
+      // Focus and show info for the selected class
+      setTimeout(() => focusOnClass(className), 100);
+    } else {
+      createVisualization(fullOntologyData);
+      setTimeout(() => focusOnClass(className), 100);
+    }
+  }
+
+  // --- Patch processOntologyData to store full data ---
   function processOntologyData(xmlData) {
     // Parse XML
     const parser = new DOMParser();
@@ -88,8 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Extract classes and their relationships
     const ontologyData = extractOntologyData(xmlDoc);
-    
-    // Create visualization
+    fullOntologyData = ontologyData; // Store full data
     createVisualization(ontologyData);
   }
   
@@ -98,10 +129,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const xmlDoc = window.ontologyDoc;
     if (!xmlDoc) return {};
     
+    // Remove disjoint classes from result
     const result = {
       subClasses: [],
       equivalentClasses: [],
-      disjointClasses: [],
       objectProperties: {}
     };
     
@@ -121,12 +152,64 @@ document.addEventListener('DOMContentLoaded', function() {
           const eqResource = eqClass.getAttribute('rdf:resource');
           if (eqResource) {
             const eqClassName = eqResource.split('#').pop() || eqResource.split('/').pop();
-            result.equivalentClasses.push(eqClassName);
+            result.equivalentClasses.push({ type: 'named', value: eqClassName });
           } else {
-            // Handle complex equivalence expressions
-            const description = eqClass.querySelector('owl\\:Class, Class');
-            if (description) {
-              result.equivalentClasses.push("Complex class expression");
+            // Handle complex equivalence expressions (intersection, union, restriction)
+            const intersection = eqClass.querySelector('owl\\:intersectionOf, intersectionOf');
+            const union = eqClass.querySelector('owl\\:unionOf, unionOf');
+            if (intersection) {
+              const operands = Array.from(intersection.querySelectorAll('rdf\\:Description, Description, owl\\:Class, Class'))
+                .map(el => {
+                  const about = el.getAttribute('rdf:about');
+                  return about ? (about.split('#').pop() || about.split('/').pop()) : null;
+                })
+                .filter(Boolean);
+              result.equivalentClasses.push({ type: 'intersection', operands });
+            } else if (union) {
+              const operands = Array.from(union.querySelectorAll('rdf\\:Description, Description, owl\\:Class, Class'))
+                .map(el => {
+                  const about = el.getAttribute('rdf:about');
+                  return about ? (about.split('#').pop() || about.split('/').pop()) : null;
+                })
+                .filter(Boolean);
+              result.equivalentClasses.push({ type: 'union', operands });
+            } else {
+              // Try to parse restrictions
+              const restriction = eqClass.querySelector('owl\\:Restriction, Restriction');
+              if (restriction) {
+                // Get property
+                let onProperty = restriction.querySelector('owl\\:onProperty, onProperty');
+                let property = null;
+                if (onProperty) {
+                  const propDesc = onProperty.querySelector('rdf\\:Description, Description');
+                  if (propDesc) {
+                    const invOf = propDesc.querySelector('owl\\:inverseOf, inverseOf');
+                    if (invOf) {
+                      const invRes = invOf.getAttribute('rdf:resource');
+                      property = invRes ? `inverseOf(${invRes.split('#').pop() || invRes.split('/').pop()})` : null;
+                    }
+                  } else {
+                    property = onProperty.getAttribute('rdf:resource');
+                    property = property ? (property.split('#').pop() || property.split('/').pop()) : null;
+                  }
+                }
+                // Get someValuesFrom
+                let someValuesFrom = restriction.querySelector('owl\\:someValuesFrom, someValuesFrom');
+                let value = null;
+                if (someValuesFrom) {
+                  value = someValuesFrom.getAttribute('rdf:resource');
+                  value = value ? (value.split('#').pop() || value.split('/').pop()) : null;
+                }
+                // Get all restriction types (some, all, min, max, exact)
+                let restrictionType = 'some';
+                if (restriction.querySelector('owl\\:allValuesFrom, allValuesFrom')) restrictionType = 'only';
+                if (restriction.querySelector('owl\\:minCardinality, minCardinality')) restrictionType = 'min';
+                if (restriction.querySelector('owl\\:maxCardinality, maxCardinality')) restrictionType = 'max';
+                if (restriction.querySelector('owl\\:cardinality, cardinality')) restrictionType = 'exact';
+                result.equivalentClasses.push({ type: 'restriction', property, value, restrictionType });
+              } else {
+                result.equivalentClasses.push({ type: 'complex', value: eqClass.textContent.trim() });
+              }
             }
           }
         });
@@ -160,16 +243,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     if (targetClassElement) {
-      // Find disjoint classes
-      const disjointElements = targetClassElement.querySelectorAll('owl\\:disjointWith, disjointWith');
-      disjointElements.forEach(disjointEl => {
-        const disjointResource = disjointEl.getAttribute('rdf:resource');
-        if (disjointResource) {
-          const disjointClassName = disjointResource.split('#').pop() || disjointResource.split('/').pop();
-          result.disjointClasses.push(disjointClassName);
-        }
-      });
-      
       // Look for object property relationships
       // This is more complex as we need to scan the entire document for properties that reference this class
       const objectProperties = xmlDoc.querySelectorAll('owl\\:ObjectProperty, ObjectProperty');
@@ -444,26 +517,30 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Display equivalent classes
     if (classDetails.equivalentClasses && classDetails.equivalentClasses.length > 0) {
-      html += '<h4>Equivalent Classes:</h4><ul>';
-      classDetails.equivalentClasses.forEach(eqClass => {
-        if (eqClass !== "Complex class expression") {
-          const eqClassLabel = getLocalizedLabel(eqClass);
-          html += `<li><a href="#" class="class-link" data-class="${eqClass}">${eqClassLabel}</a></li>`;
+      html += '<h4>Equivalent To</h4>';
+      html += '<div class="equivalent-axiom">';
+      classDetails.equivalentClasses.forEach(eq => {
+        if (eq.type === 'named') {
+          const eqClassLabel = getLocalizedLabel(eq.value);
+          html += `<span class="eq-class"><a href="#" class="class-link" data-class="${eq.value}">${eqClassLabel}</a></span> `;
+        } else if (eq.type === 'intersection') {
+          html += eq.operands.map(op => {
+            const opLabel = getLocalizedLabel(op);
+            return `<span class="eq-class"><a href="#" class="class-link" data-class="${op}">${opLabel}</a></span>`;
+          }).join(' <span class="eq-and">and</span> ');
+        } else if (eq.type === 'union') {
+          html += eq.operands.map(op => {
+            const opLabel = getLocalizedLabel(op);
+            return `<span class="eq-class"><a href="#" class="class-link" data-class="${op}">${opLabel}</a></span>`;
+          }).join(' <span class="eq-or">or</span> ');
+        } else if (eq.type === 'restriction') {
+          let restrictionLabel = eq.restrictionType === 'some' ? 'some' : eq.restrictionType;
+          html += `<span class="eq-restriction">(${eq.property} <span class="eq-some">${restrictionLabel}</span> ${getLocalizedLabel(eq.value)})</span> `;
         } else {
-          html += `<li>${eqClass}</li>`;
+          html += `<span class="eq-complex">${eq.value}</span> `;
         }
       });
-      html += '</ul>';
-    }
-    
-    // Display disjoint classes
-    if (classDetails.disjointClasses && classDetails.disjointClasses.length > 0) {
-      html += '<h4>Disjoint Classes:</h4><ul>';
-      classDetails.disjointClasses.forEach(disjointClass => {
-        const disjointClassLabel = getLocalizedLabel(disjointClass);
-        html += `<li><a href="#" class="class-link" data-class="${disjointClass}">${disjointClassLabel}</a></li>`;
-      });
-      html += '</ul>';
+      html += '</div>';
     }
     
     // Display object property relations
@@ -492,7 +569,8 @@ document.addEventListener('DOMContentLoaded', function() {
       link.addEventListener('click', function(e) {
         e.preventDefault();
         const targetClass = this.getAttribute('data-class');
-        focusOnClass(targetClass);
+        lastSelectedClass = targetClass;
+        showBranchOrFull(targetClass);
       });
     });
   }
@@ -825,114 +903,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add click event to nodes
     node.on('click', function(event, d) {
-      if (d.data.id === "OntologyRoot") return; // Skip the virtual root
-      
-      // Remove previous selection
-      d3.selectAll('.node').classed('selected', false);
-      
-      // Highlight selected node
-      d3.select(this).classed('selected', true);
-      
-      // Display class information
-      const infoPanel = document.getElementById('class-info');
-      let html = `<h3>${d.data.name}</h3>`;
-      
-      // Display all axioms for the class
-      const className = d.data.id;
-      const classDetails = extractClassAxioms(className);
-      
-      // Display comments
-      if (d.data.comments && d.data.comments.length > 0) {
-        html += '<h4>Comments:</h4>';
-        d.data.comments.forEach(comment => {
-          html += `<div class="comment">${comment}</div>`;
-        });
-      } else {
-        html += '<p>No comments available.</p>';
-      }
-      
-      // Display available language labels if they exist
-      if (d.data.labels && Object.keys(d.data.labels).length > 0) {
-        html += '<h4>Available Labels:</h4><ul>';
-        for (const [lang, label] of Object.entries(d.data.labels)) {
-          html += `<li><strong>${lang}:</strong> ${label}</li>`;
-        }
-        html += '</ul>';
-      }
-      
-      // Display superclasses
-      if (d.data.superClasses && d.data.superClasses.length > 0) {
-        html += '<h4>Superclasses:</h4><ul>';
-        d.data.superClasses.forEach(superClass => {
-          const superClassLabel = getLocalizedLabel(superClass);
-          html += `<li><a href="#" class="class-link" data-class="${superClass}">${superClassLabel}</a></li>`;
-        });
-        html += '</ul>';
-      }
-      
-      // Display subclasses
-      if (classDetails.subClasses && classDetails.subClasses.length > 0) {
-        html += '<h4>Subclasses:</h4><ul>';
-        classDetails.subClasses.forEach(subClass => {
-          const subClassLabel = getLocalizedLabel(subClass);
-          html += `<li><a href="#" class="class-link" data-class="${subClass}">${subClassLabel}</a></li>`;
-        });
-        html += '</ul>';
-      }
-      
-      // Display equivalent classes
-      if (classDetails.equivalentClasses && classDetails.equivalentClasses.length > 0) {
-        html += '<h4>Equivalent Classes:</h4><ul>';
-        classDetails.equivalentClasses.forEach(eqClass => {
-          if (eqClass !== "Complex class expression") {
-            const eqClassLabel = getLocalizedLabel(eqClass);
-            html += `<li><a href="#" class="class-link" data-class="${eqClass}">${eqClassLabel}</a></li>`;
-          } else {
-            html += `<li>${eqClass}</li>`;
-          }
-        });
-        html += '</ul>';
-      }
-      
-      // Display disjoint classes
-      if (classDetails.disjointClasses && classDetails.disjointClasses.length > 0) {
-        html += '<h4>Disjoint Classes:</h4><ul>';
-        classDetails.disjointClasses.forEach(disjointClass => {
-          const disjointClassLabel = getLocalizedLabel(disjointClass);
-          html += `<li><a href="#" class="class-link" data-class="${disjointClass}">${disjointClassLabel}</a></li>`;
-        });
-        html += '</ul>';
-      }
-      
-      // Display object property relations
-      if (classDetails.objectProperties && Object.keys(classDetails.objectProperties).length > 0) {
-        html += '<h4>Object Property Relationships:</h4><ul>';
-        for (const [property, values] of Object.entries(classDetails.objectProperties)) {
-          html += `<li><strong>${property}:</strong><ul>`;
-          values.forEach(value => {
-            // If the value is a class name (not a descriptive text like "Domain of this property")
-            if (!value.startsWith("Domain of") && !value.startsWith("Range of")) {
-              const valueLabel = getLocalizedLabel(value);
-              html += `<li><a href="#" class="class-link" data-class="${value}">${valueLabel}</a></li>`;
-            } else {
-              html += `<li>${value}</li>`;
-            }
-          });
-          html += `</ul></li>`;
-        }
-        html += '</ul>';
-      }
-      
-      infoPanel.innerHTML = html;
-      
-      // Add event listeners to class links
-      document.querySelectorAll('.class-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-          e.preventDefault();
-          const targetClass = this.getAttribute('data-class');
-          focusOnClass(targetClass);
-        });
-      });
+      if (d.data.id === "OntologyRoot") return;
+      lastSelectedClass = d.data.id;
+      showBranchOrFull(d.data.id);
     });
     
     // Drag functions
@@ -990,7 +963,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return `M${d.y},${d.x}
                     C${(d.y + link.target.y) / 2},${d.x}
                      ${(d.y + link.target.y) / 2},${link.target.x}
-                     ${link.target.y},${link.target.x}`;
+                     ${d.target.y},${d.target.x}`;
           } else if (link.target === d) {
             return `M${link.source.y},${link.source.x}
                     C${(link.source.y + d.y) / 2},${link.source.x}
@@ -1011,5 +984,40 @@ document.addEventListener('DOMContentLoaded', function() {
       delete d.dragOffsetX;
       delete d.dragOffsetY;
     }
+  }
+
+  // --- Branch extraction logic ---
+  function getBranchOntologyData(data, className) {
+    // Find the node for className
+    const nodeMap = {};
+    data.nodes.forEach(n => nodeMap[n.id] = {...n});
+    // Find all subclasses recursively
+    const subclasses = new Set();
+    function findSubclasses(id) {
+      data.links.forEach(link => {
+        if (link.source === id) {
+          subclasses.add(link.target);
+          findSubclasses(link.target);
+        }
+      });
+    }
+    findSubclasses(className);
+    // Find all superclasses recursively
+    const superclasses = new Set();
+    function findSuperclasses(id) {
+      data.links.forEach(link => {
+        if (link.target === id) {
+          superclasses.add(link.source);
+          findSuperclasses(link.source);
+        }
+      });
+    }
+    findSuperclasses(className);
+    // Collect all relevant node ids
+    const nodeIds = new Set([className, ...subclasses, ...superclasses]);
+    // Filter nodes and links
+    const nodes = data.nodes.filter(n => nodeIds.has(n.id));
+    const links = data.links.filter(l => nodeIds.has(l.source) && nodeIds.has(l.target));
+    return { nodes, links };
   }
 });

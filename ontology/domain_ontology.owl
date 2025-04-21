@@ -445,6 +445,7 @@ A preventive precondition helps (or even is a necessary precondition for) bringi
         <rdfs:comment>The umbrella for all the malfunction-related classes. 
 
 As a heuristic definition, one can consider &quot;the class of all occurrents who are related to a malfunction through the symmetric, transitive closure of all the cusal relations of MALFO (achieves, allows, disallows, prevents, facilitative, preventive, maintains)&quot;</rdfs:comment>
+        <rdfs:label xml:lang="en">MalfunctionRelatedHappening</rdfs:label>
     </owl:Class>
     
 
