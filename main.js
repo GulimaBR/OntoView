@@ -97,27 +97,48 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Helper to show branch or full view
-  function showBranchOrFull(className) {
-    // Only recreate visualization if we're changing view modes or data hasn't been visualized yet
-    const needsRecreation = !globalVisualizationState.treeData || 
-                           (branchViewActive && className && !lastBranchClassName) ||
-                           (!branchViewActive && lastBranchClassName);
+  function showBranchOrFull(className, skipVisualization = false) {
+    // Only recreate visualization if:
+    // 1. No visualization exists yet
+    // 2. We're switching between branch view and full view
+    // 3. We're changing which class is being shown in branch view
+    // 4. Not skipping visualization (e.g., via Ctrl+click)
+    const needsRecreation = !skipVisualization && (
+                            !globalVisualizationState.treeData || 
+                            (branchViewActive && className && window.lastBranchClassName !== className) ||
+                            (!branchViewActive && window.lastBranchClassName));
     
     // Track if we're in branch view and which class is being shown
-    window.lastBranchClassName = branchViewActive ? className : null;
+    if (branchViewActive) {
+      window.lastBranchClassName = className;
+    } else {
+      window.lastBranchClassName = null;
+    }
     
     if (needsRecreation) {
       if (branchViewActive && className) {
         const branchData = getBranchOntologyData(fullOntologyData, className);
         createVisualization(branchData);
+        // Focus will be handled after visualization is created in setTimeout
+        setTimeout(() => focusOnClass(className), 100);
       } else {
         createVisualization(fullOntologyData);
+        // Focus after visualization is created
+        setTimeout(() => focusOnClass(className), 100);
       }
-      // Focus will be handled after visualization is created
-      setTimeout(() => focusOnClass(className), 100);
     } else {
       // Just focus on the class without recreating the visualization
       focusOnClass(className);
+      
+      // Make sure the class info is displayed (for node clicks with modifier key)
+      const matchingNode = globalVisualizationState.nodeElements?.filter(d => 
+        d.data.id === className || d.data.name === className
+      );
+      
+      if (matchingNode && matchingNode.size() > 0) {
+        const node = matchingNode.datum();
+        displayClassInfo(node);
+      }
     }
   }
 
@@ -989,19 +1010,8 @@ document.addEventListener('DOMContentLoaded', function() {
       // Store the last selected class ID
       lastSelectedClass = d.data.id;
       
-      // Only update visualization if branch view is active and should change
-      const shouldChangeVisualization = branchViewActive && !event.ctrlKey && !event.metaKey;
-      
-      if (shouldChangeVisualization) {
-        // If branch view is active, we regenerate the visualization
-        const branchData = getBranchOntologyData(fullOntologyData, d.data.id);
-        createVisualization(branchData);
-        // Focus will be handled by the createVisualization callback
-      } else {
-        // Otherwise just focus on the class and display info without regenerating
-        focusOnClass(d.data.id);
-        displayClassInfo(d);
-      }
+      // Pass the modifier keys to showBranchOrFull
+      showBranchOrFull(d.data.id, event.ctrlKey || event.metaKey);
     });
     
     // Drag functions
