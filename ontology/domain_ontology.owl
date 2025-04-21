@@ -1,0 +1,1500 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="https://www.w3id.org/MALFO#"
+     xml:base="https://www.w3id.org/MALFO"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:www="https://www.w3id.org/"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:swrl="http://www.w3.org/2003/11/swrl#"
+     xmlns:swrla="http://swrl.stanford.edu/ontologies/3.3/swrla.owl#"
+     xmlns:swrlb="http://www.w3.org/2003/11/swrlb#"
+     xmlns:terms="http://purl.org/dc/terms/">
+    <owl:Ontology rdf:about="https://www.w3id.org/MALFO">
+        <dc:contributor>Francesco Compagno</dc:contributor>
+        <dc:description>MALFunction Ontology: an ontology about malfunction-related happenings</dc:description>
+        <dc:title>MALFO</dc:title>
+        <terms:license rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://creativecommons.org/licenses/by/4.0/</terms:license>
+        <owl:versionInfo>1.1:
+- changed the definition of failure condition so that now there is a single equivalence axioms
+- added functionalIncompatibleWith object property, to harmonize with clif version
+- changed definition of MereSymptom and removed FunctionCompatible class, to harmonize with clif version
+- added comments to all entities
+- added annotations to the ontology
+- added (the only) two cases of sufficient conditions for FailureCondition
+- changed the name &quot;FailureRelatedHappening&quot; to &quot;MalfunctionRelatedHappening&quot; as it is more coherent with the definitions of Failure and Malfunction in the ontology
+- added subclass axiom to MalfunctionRelatedHappening for MereSymptom, FailureCondition, and FailureMechanism
+- removed some redundant subclass axioms</owl:versionInfo>
+        <owl:versionInfo>1.2:
+- added three property chains for disallows
+- added one property chain with maintains for allows</owl:versionInfo>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://purl.org/dc/elements/1.1/contributor -->
+
+    <owl:AnnotationProperty rdf:about="http://purl.org/dc/elements/1.1/contributor"/>
+    
+
+
+    <!-- http://purl.org/dc/elements/1.1/description -->
+
+    <owl:AnnotationProperty rdf:about="http://purl.org/dc/elements/1.1/description"/>
+    
+
+
+    <!-- http://purl.org/dc/elements/1.1/title -->
+
+    <owl:AnnotationProperty rdf:about="http://purl.org/dc/elements/1.1/title"/>
+    
+
+
+    <!-- http://purl.org/dc/terms/license -->
+
+    <owl:AnnotationProperty rdf:about="http://purl.org/dc/terms/license"/>
+    
+
+
+    <!-- http://swrl.stanford.edu/ontologies/3.3/swrla.owl#isRuleEnabled -->
+
+    <owl:AnnotationProperty rdf:about="http://swrl.stanford.edu/ontologies/3.3/swrla.owl#isRuleEnabled"/>
+    
+
+
+    <!-- https://www.w3id.org/MALFOachieves -->
+
+    <owl:AnnotationProperty rdf:about="https://www.w3id.org/MALFOachieves"/>
+    
+
+
+    <!-- https://www.w3id.org/MALFOtransitivePosCauseOf -->
+
+    <owl:AnnotationProperty rdf:about="https://www.w3id.org/MALFOtransitivePosCauseOf"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- https://www.w3id.org/MALFO#achieves -->
+
+    <owl:ObjectProperty rdf:about="https://www.w3id.org/MALFO#achieves">
+        <rdfs:subPropertyOf rdf:resource="https://www.w3id.org/MALFO#causeOf"/>
+        <rdfs:subPropertyOf rdf:resource="https://www.w3id.org/MALFO#posCauseOf"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Event"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Process"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#State"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+        <rdfs:range>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Process"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#State"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:range>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#achieves"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#hasPhysicalConseq"/>
+        </owl:propertyChainAxiom>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#hasPhysicalConseq"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#achieves"/>
+        </owl:propertyChainAxiom>
+        <rdfs:comment>Direct and positive causatio, requires tight coupling between the arguments, in particular the juxtaposition or overlapping of their time extension.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://arxiv.org/ftp/arxiv/papers/2307/2307.07517.pdf</rdfs:isDefinedBy>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#allows -->
+
+    <owl:ObjectProperty rdf:about="https://www.w3id.org/MALFO#allows">
+        <rdfs:subPropertyOf rdf:resource="https://www.w3id.org/MALFO#causeOf"/>
+        <rdfs:subPropertyOf rdf:resource="https://www.w3id.org/MALFO#posCauseOf"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Event"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Process"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+        <rdfs:range>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Event"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Process"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#State"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:range>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#achieves"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#facilPreconditionFor"/>
+        </owl:propertyChainAxiom>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#allows"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#hasPhysicalConseq"/>
+        </owl:propertyChainAxiom>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#hasPhysicalConseq"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#allows"/>
+        </owl:propertyChainAxiom>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#maintains"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#facilPreconditionFor"/>
+        </owl:propertyChainAxiom>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#prevents"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#prevPreconditionFor"/>
+        </owl:propertyChainAxiom>
+        <rdfs:comment>(i) achieving or maintaining a facilitative precondition, or (ii) preventing a preventive precondition (and assuming that, at the same time, no additional preventive precondition was achieved).</rdfs:comment>
+        <rdfs:isDefinedBy>https://doi.org/10.3233/AO-190206</rdfs:isDefinedBy>
+    </owl:ObjectProperty>
+    <owl:Axiom>
+        <owl:annotatedSource rdf:resource="https://www.w3id.org/MALFO#allows"/>
+        <owl:annotatedProperty rdf:resource="http://www.w3.org/2002/07/owl#propertyChainAxiom"/>
+        <owl:annotatedTarget rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#prevents"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#prevPreconditionFor"/>
+        </owl:annotatedTarget>
+        <rdfs:comment>Technically not compatible with the first-order version, instead it is slightly stronger. However, it is kept because otherwise, due to the open world assumption, the corresponding inference would never be applied. 
+Consider removing if necessary.</rdfs:comment>
+    </owl:Axiom>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#causeOf -->
+
+    <owl:ObjectProperty rdf:about="https://www.w3id.org/MALFO#causeOf">
+        <rdfs:domain rdf:resource="https://www.w3id.org/MALFO#Occurrent"/>
+        <rdfs:range rdf:resource="https://www.w3id.org/MALFO#Occurrent"/>
+        <rdfs:comment>Cause of is an umbrella for all the direct causation relations of MALFO: either achievs, allows, disallows, or prevents causation-types (we also include physical consequences)</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#disallows -->
+
+    <owl:ObjectProperty rdf:about="https://www.w3id.org/MALFO#disallows">
+        <rdfs:subPropertyOf rdf:resource="https://www.w3id.org/MALFO#causeOf"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Event"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Process"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+        <rdfs:range>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Event"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Process"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#State"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:range>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#achieves"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#prevPreconditionFor"/>
+        </owl:propertyChainAxiom>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#disallows"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#hasPhysicalConseq"/>
+        </owl:propertyChainAxiom>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#hasPhysicalConseq"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#disallows"/>
+        </owl:propertyChainAxiom>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#maintains"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#prevPreconditionFor"/>
+        </owl:propertyChainAxiom>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#prevents"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#facilPreconditionFor"/>
+        </owl:propertyChainAxiom>
+        <rdfs:comment>(i) achieving or maintaining a preventive precondition, or (ii) preventing a facilitative precondition.</rdfs:comment>
+        <rdfs:isDefinedBy>https://doi.org/10.3233/AO-190206</rdfs:isDefinedBy>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#facilPreconditionFor -->
+
+    <owl:ObjectProperty rdf:about="https://www.w3id.org/MALFO#facilPreconditionFor">
+        <rdfs:subPropertyOf rdf:resource="https://www.w3id.org/MALFO#posCauseOf"/>
+        <rdfs:domain rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:range>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Event"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Process"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#State"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:range>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#facilPreconditionFor"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#hasPhysicalConseq"/>
+        </owl:propertyChainAxiom>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#hasPhysicalConseq"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#facilPreconditionFor"/>
+        </owl:propertyChainAxiom>
+        <rdfs:comment>&quot;A precondition for an occurrent is a condition whose truth value influences the activation of the associated occurrent.&quot; -- Riichiro Mizoguchi, Causing is Achieving:  A solution to the problem of causation, p.6 https://arxiv.org/ftp/arxiv/papers/2307/2307.07517.pdf, last accessed in May 2024
+
+A facilitative precondition helps (or even is a necessary precondition for) bringinng about an occurrence.</rdfs:comment>
+        <rdfs:isDefinedBy>https://arxiv.org/ftp/arxiv/papers/2307/2307.07517.pdf</rdfs:isDefinedBy>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#functionalIncompatibleWith -->
+
+    <owl:ObjectProperty rdf:about="https://www.w3id.org/MALFO#functionalIncompatibleWith">
+        <rdfs:comment>By saying that an occurrence is functional-incompatible with a function, we mean synchronous logical-incompatibility of the occurrence with the execution of the function (the function must be related to some object participating in the occurrence). For example, if the function of an electric wire is to carry electricity, and a logically-necessary requirement for the wire to do that is being physically connected, then `the wire being cut in two&apos; is function-incompatible with the wire&apos;s function.</rdfs:comment>
+        <rdfs:comment>Clearly, the range of this property is intended to be a class of functions. We do not write it explicitly in the ontology what kind of class to leave users with the freedom of chosing themselves.</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#hasPhysicalConseq -->
+
+    <owl:ObjectProperty rdf:about="https://www.w3id.org/MALFO#hasPhysicalConseq">
+        <rdfs:subPropertyOf rdf:resource="https://www.w3id.org/MALFO#causeOf"/>
+        <rdfs:subPropertyOf rdf:resource="https://www.w3id.org/MALFO#posCauseOf"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
+        <rdfs:domain rdf:resource="https://www.w3id.org/MALFO#Occurrent"/>
+        <rdfs:range rdf:resource="https://www.w3id.org/MALFO#Occurrent"/>
+        <rdfs:comment>if z is `yesterday I ate less than three apples&apos;, and x is `yesterday I ate exactly two apples&apos; and y is the occurrence that `yesterday I ate exactly one apple&apos;, then is clear that x and y both `imply&apos; z, meaning that if x or y happened, also z happened. 
+We call `physical consequence&apos; this kind of implication.
+For example `peak vibration is 1.13 times over nominal limit&apos; causes the `fatigue imposed on the axis to be 1.13 times than normal&apos; (Matthews, A Practical Guide to Engineering Failure Investigation, 1998).
+
+Note that physical-consequenc is a different type than other causal-consequences (e.g., achieves). For instance, a key difference is that causal-consequence requires a (possibly extended) spatial and temporal contiguity or overlapping, while physical-consequence is `immediate&apos;/`synchronous&apos; and does not take place somewhere nor during some time. Another difference is that causal-consequence is antisymmetric and not (generally speaking) transitive, while physical-consequence is transitive and could be bidirectional.</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#incompatibleWith -->
+
+    <owl:ObjectProperty rdf:about="https://www.w3id.org/MALFO#incompatibleWith">
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#incompatibleWith"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#prevPreconditionFor"/>
+        </owl:propertyChainAxiom>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#prevPreconditionFor"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#incompatibleWith"/>
+        </owl:propertyChainAxiom>
+        <rdfs:comment>we interpret internalTo as physical incompatibility between two occurrences. For example, if we call x the occurrence that `yesterday I ate exactly two apples&apos; and call y the occurrence that `yesterday I ate exactly one apple&apos;, then we say that x is incompatible with y</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#internalTo -->
+
+    <owl:ObjectProperty rdf:about="https://www.w3id.org/MALFO#internalTo">
+        <rdfs:comment>For example, consider the case of the right headlight of a car that is not working because the filaments of its light bulb are burned. The occurrence ‘the filaments are burned’ (in other words, `the filaments are disconnected&apos;) is internal to the occurrence ‘the right headlight is not working&apos;.</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#maintains -->
+
+    <owl:ObjectProperty rdf:about="https://www.w3id.org/MALFO#maintains">
+        <rdfs:comment>&quot;The function Maintain which originally refers to the function of outputting the incoming operand without changing it. The prototypical example is a conduit that outputs
+exactly what is fed into it: a water pipe has an output flow rate that is equal to the input flow rate. The general Maintain function performs similarly by keeping the current state unchanged. In terms of Maintain, “John did not lock the door” is paraphrased as he Maintained the lock in the unlocked state. In other words,
+the omission of an event that should have occurred Maintains the current state (by doing nothing). The introduction of Maintain thus overcomes the theoretical difficulty of mentioning an occurrent which does not happen&quot;. 
+-- Riichiro Mizoguchi, Causing is Achieving:  A solution to the problem of causation, p.6-7 https://arxiv.org/ftp/arxiv/papers/2307/2307.07517.pdf, last accessed in May 2024</rdfs:comment>
+        <rdfs:isDefinedBy>https://arxiv.org/ftp/arxiv/papers/2307/2307.07517.pdf</rdfs:isDefinedBy>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#posCauseOf -->
+
+    <owl:ObjectProperty rdf:about="https://www.w3id.org/MALFO#posCauseOf">
+        <rdfs:subPropertyOf rdf:resource="https://www.w3id.org/MALFO#transitivePosCauseOf"/>
+        <rdfs:isDefinedBy>positive causation: achieves, allows, and physical causation</rdfs:isDefinedBy>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#prevPreconditionFor -->
+
+    <owl:ObjectProperty rdf:about="https://www.w3id.org/MALFO#prevPreconditionFor">
+        <rdfs:domain rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:range>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Event"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Process"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#State"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:range>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#hasPhysicalConseq"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#prevPreconditionFor"/>
+        </owl:propertyChainAxiom>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#prevPreconditionFor"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#hasPhysicalConseq"/>
+        </owl:propertyChainAxiom>
+        <rdfs:comment>&quot;A precondition for an occurrent is a condition whose truth value influences the activation of the associated occurrent.&quot; -- Riichiro Mizoguchi, Causing is Achieving:  A solution to the problem of causation, p.6 https://arxiv.org/ftp/arxiv/papers/2307/2307.07517.pdf, last accessed in May 2024
+
+A preventive precondition helps (or even is a necessary precondition for) bringinng about an occurrence.</rdfs:comment>
+        <rdfs:isDefinedBy>https://arxiv.org/ftp/arxiv/papers/2307/2307.07517.pdf</rdfs:isDefinedBy>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#prevents -->
+
+    <owl:ObjectProperty rdf:about="https://www.w3id.org/MALFO#prevents">
+        <rdfs:subPropertyOf rdf:resource="https://www.w3id.org/MALFO#causeOf"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Event"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Process"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#State"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+        <rdfs:range>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Process"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#State"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:range>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#achieves"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#incompatibleWith"/>
+        </owl:propertyChainAxiom>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#hasPhysicalConseq"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#prevents"/>
+        </owl:propertyChainAxiom>
+        <owl:propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#prevents"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#hasPhysicalConseq"/>
+        </owl:propertyChainAxiom>
+        <rdfs:comment>achieving a state that is incompatible with the caused occurrence</rdfs:comment>
+        <rdfs:isDefinedBy>https://doi.org/10.3233/AO-190206</rdfs:isDefinedBy>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#transitivePosCauseOf -->
+
+    <owl:ObjectProperty rdf:about="https://www.w3id.org/MALFO#transitivePosCauseOf">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#TransitiveProperty"/>
+        <rdfs:isDefinedBy>Transitive closure of positive cause</rdfs:isDefinedBy>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.loa.istc.cnr.it/engineering-domain/MalfunctionRelatedHappening -->
+
+    <owl:Class rdf:about="http://www.loa.istc.cnr.it/engineering-domain/MalfunctionRelatedHappening">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Occurrent"/>
+        <rdfs:comment>The umbrella for all the malfunction-related classes. 
+
+As a heuristic definition, one can consider &quot;the class of all occurrents who are related to a malfunction through the symmetric, transitive closure of all the cusal relations of MALFO (achieves, allows, disallows, prevents, facilitative, preventive, maintains)&quot;</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#AbruptBSWIncrease -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#AbruptBSWIncrease">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#DHSVClosedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#DownState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Failure"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FailureCondition"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FailureMechanism"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Fault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FlowInstability"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HighBSWState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInProductionLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInServiceLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentProductionLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentServiceLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#LostProductivityState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:comment xml:lang="en">Represents Event 1: Abrupt Increase of BSW (Basic Sediment and Water). This is classified as a NonPerformanceEvent because:
+1. It is an Event (or rapid Process) representing a sudden change.
+2. It is a Malfunction, as the high BSW level achieved is incompatible with the primary function of producing oil efficiently. The state achieved (High BSW) prevents the system from performing its function correctly.
+3. It is NOT a Failure in the MALFO sense because it does not necessarily achieve a Fault (a state of inability due to an *internal* cause of the *component* exhibiting the state). The high BSW state itself is better classified as a DownState, as the inability to produce clean oil often results from external factors (reservoir water breakthrough) rather than an internal defect of the production line itself. The event &apos;Abrupt Increase BSW&apos; achieves this DownState.</rdfs:comment>
+        <www:MALFOachieves rdf:resource="https://www.w3id.org/MALFO#HighBSWState"/>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#DHSVClosedFault -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#DHSVClosedFault">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Fault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#DownState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Event"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Failure"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FailureCondition"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FailureMechanism"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FlowInstability"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HighBSWState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInProductionLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInServiceLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentProductionLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentServiceLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#LostProductivityState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <rdfs:comment xml:lang="en">The state where the Downhole Safety Valve is closed due to a spurious, internal trigger event, preventing production flow. This is a Fault as the inability to function (allow flow) is due to an internal event/state of the valve.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#DownState -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#DownState">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Malfunction"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#State"/>
+                    <owl:Class>
+                        <owl:complementOf rdf:resource="https://www.w3id.org/MALFO#Fault"/>
+                    </owl:Class>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Event"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Failure"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FailureCondition"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FailureMechanism"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Fault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FlowInstability"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInProductionLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInServiceLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentProductionLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentServiceLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <rdfs:comment>x is a down state means that x is a malfunction and a function-compatible state and also not a fault.
+
+The reason for introducing this term is to distinguish between the abnormal states of a component that require corrective actions from those that do not, since the effective cause of the fault is located elsewhere. For instance, if the right headlight of a car is not lit up when it should be, there are at least two possibilities: either the headlight itself is broken, say the lightbulb is blown, in that case `the headlight is not lit up&apos; is a fault and the headlight must be repaired; or there is another component that is broken, say the wire linking the headlight to the car&apos;s battery is cut. In this latter case, it is the wire that must be replaced, and `the headlight is not lit up&apos; is a down state.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#Event -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#Event">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Occurrent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FailureCondition"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Fault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FlowInstability"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HighBSWState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentProductionLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentServiceLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#LostProductivityState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:comment>In engineering, an important class of occurrences, which in this work we consider as archetypical examples of events are those occurrences that, being very brief, are considered instantaneous, such as impacts or ruptures.
+
+More precise definitions are left open to interpretation (e.g. through alignment with an upper ontology)</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#Failure -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#Failure">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Event"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Malfunction"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="https://www.w3id.org/MALFO#achieves"/>
+                        <owl:someValuesFrom rdf:resource="https://www.w3id.org/MALFO#Fault"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Event"/>
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FailureCondition"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FailureMechanism"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Fault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FlowInstability"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HighBSWState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInProductionLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInServiceLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentProductionLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentServiceLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#LostProductivityState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NormalOperation"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:comment>x is a failure means that x is a malfunction and an event that achieves some fault.
+
+With this definition we try to capture the common concept of failure present in the literature: the loss of the ability to perform a function. We also stipulate, by definition, that failures cause faults. For example, if a wire, whose function is to carry electricity, is gnawed by a rat, the wire fails when it breaks and ceases to be able to conduct electricity.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#FailureCondition -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#FailureCondition">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#State"/>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="https://www.w3id.org/MALFO#prevPreconditionFor"/>
+                                <owl:someValuesFrom>
+                                    <owl:Restriction>
+                                        <owl:onProperty rdf:resource="https://www.w3id.org/MALFO#disallows"/>
+                                        <owl:someValuesFrom rdf:resource="https://www.w3id.org/MALFO#Failure"/>
+                                    </owl:Restriction>
+                                </owl:someValuesFrom>
+                            </owl:Restriction>
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="https://www.w3id.org/MALFO#transitivePosCauseOf"/>
+                                <owl:someValuesFrom rdf:resource="https://www.w3id.org/MALFO#Failure"/>
+                            </owl:Restriction>
+                        </owl:unionOf>
+                    </owl:Class>
+                    <owl:Class>
+                        <owl:complementOf rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+                    </owl:Class>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://www.loa.istc.cnr.it/engineering-domain/MalfunctionRelatedHappening"/>
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FailureMechanism"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Fault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FlowInstability"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HighBSWState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInProductionLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInServiceLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#LostProductivityState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <rdfs:comment>x is a failure condition means that x is not a malfunction, is a state, and is either the facilitative precondition for a failure or the positive cause, eventually, of that failure, or it is the preventive precondition for some occurrence that disallows the failure.
+
+Failure conditions have the same causal role as failure mechanisms, but are states in place of processes (e.g. `being corroded&apos; in place of `corrosion&apos;). We also add explicitly the case of negative causation, that is, e.g. the case that the state of being corroded inhibits a safety function and such inhibition then causes a failure.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#FailureMechanism -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#FailureMechanism">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="https://www.w3id.org/MALFO#Event"/>
+                            <rdf:Description rdf:about="https://www.w3id.org/MALFO#Process"/>
+                        </owl:unionOf>
+                    </owl:Class>
+                    <owl:Class>
+                        <owl:complementOf rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+                    </owl:Class>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="https://www.w3id.org/MALFO#transitivePosCauseOf"/>
+                        <owl:someValuesFrom rdf:resource="https://www.w3id.org/MALFO#Failure"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://www.loa.istc.cnr.it/engineering-domain/MalfunctionRelatedHappening"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Fault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FlowInstability"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HighBSWState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentProductionLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentServiceLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#LostProductivityState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:comment>x is a failure mechanism means that x is not a malfunction, is either a process or an event, and is the positive cause, eventually, of some failure
+
+FailureMechanism tries to convey the meaning behind common occurrence-types such as corrosion, wear, cracking, etc., which typically are not considered failures, but do cause failures in some sense.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#Fault -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#Fault">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="https://www.w3id.org/MALFO#achieves"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="http://www.loa.istc.cnr.it/engineering-domain/MalfunctionRelatedHappening"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="https://www.w3id.org/MALFO#internalTo"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="http://www.loa.istc.cnr.it/engineering-domain/MalfunctionRelatedHappening"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#FlowInstability"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HighBSWState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInProductionLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInServiceLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentProductionLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentServiceLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#LostProductivityState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <rdfs:comment>Note that sufficient conditions for the classifications are expressed as a SWRL rule</rdfs:comment>
+        <rdfs:comment>x is a fault means that x is malfunction and a state and is achieved by some occurrence internal to itself
+
+Notice that we somewhat weakened the classic definition of fault ``inability to function due to an internal state&apos;&apos;, otherwise the z in the definient should be classified as a state. We consider that such classification is not necessary, and the z may belogn to other occurrent-types: for example, if `catastrophic fracture of the main axis&apos; (z) causes the an industrial fan to `be completely non-operational&apos; (x), the first occurrence (the fracture) is an event internal to the second occurrence (being non operational), a state, which is non function-compatible, and, therefore, a fault by definition.
+ 
+Another example, this time in which the z is a state, is the `being cut into two parts&apos;-state (z) of an electrical wire, which is an internal state that causes the state of `being unable to transmit electricity&apos; (x), which is then a fault by definition</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#FlowInstability -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#FlowInstability">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://www.w3id.org/MALFO#allows"/>
+                <owl:someValuesFrom rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HighBSWState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInProductionLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInServiceLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentProductionLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentServiceLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#LostProductivityState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:comment xml:lang="en">Represents Event 4: Flow Instability. This is classified as a MalfunctionProcess because:
+1. It is a Process (a dynamic, less periodic/intense flow pattern than severe slugging).
+2. It is a Malfunction, as this unstable flow is incompatible with the desired function of stable production flow. It can be a precursor to Severe Slugging.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#HighBSWState -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#HighBSWState">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#DownState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInProductionLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydrateInServiceLine"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentProductionLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentServiceLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <rdfs:comment xml:lang="en">The state of having an abnormally high Basic Sediment and Water content in the produced fluid. This is a DownState because it represents an inability to perform the required function (produce primarily oil) but is typically caused by external factors (e.g., reservoir changes) rather than an internal fault of the production system components themselves.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#HydrateInProductionLine -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#HydrateInProductionLine">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#FailureMechanism"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://www.w3id.org/MALFO#transitivePosCauseOf"/>
+                <owl:someValuesFrom rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentProductionLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentServiceLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#LostProductivityState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:comment xml:lang="en">Represents Event 8: Hydrate in Production Line. The hydrate *formation process* is classified as a FailureMechanism because:
+1. Hydrate formation is a Process (crystallization under specific conditions).
+2. The process itself is NOT inherently a Malfunction.
+3. It transitively positively causes a Failure: The formation process leads to a blockage (which can be seen as a Failure event) achieving the Fault state &apos;Production Line Blocked by Hydrate&apos;. The state &apos;Hydrate Present in Production Line&apos; is a FailureCondition that eventually leads to the Fault.</rdfs:comment>
+        <www:MALFOtransitivePosCauseOf rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#HydrateInServiceLine -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#HydrateInServiceLine">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#FailureMechanism"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://www.w3id.org/MALFO#transitivePosCauseOf"/>
+                <owl:someValuesFrom rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentProductionLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#HydratePresentServiceLineState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#LostProductivityState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:comment xml:lang="en">Represents Event 9: Hydrate in Service Line. The hydrate *formation process* is classified as a FailureMechanism because:
+1. Hydrate formation is a Process (crystallization under specific conditions).
+2. The process itself is NOT inherently a Malfunction of the service line&apos;s primary purpose (though it prevents its use).
+3. It transitively positively causes a Failure: The formation process leads to a blockage (a Failure event) achieving the Fault state &apos;Service Line Blocked by Hydrate&apos;. The state &apos;Hydrate Present in Service Line&apos; is a FailureCondition leading to the Fault. This is analogous to Event 8 but in a different location.</rdfs:comment>
+        <www:MALFOtransitivePosCauseOf rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#HydratePresentProductionLineState -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#HydratePresentProductionLineState">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#FailureCondition"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#LostProductivityState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <rdfs:comment xml:lang="en">The state where hydrates are present within the Production Line. This state is a FailureCondition as it makes a future Fault (blockage) likely under continued permissive conditions but isn&apos;t necessarily a Malfunction itself until flow is significantly impeded.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#HydratePresentServiceLineState -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#HydratePresentServiceLineState">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#FailureCondition"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#LostProductivityState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <rdfs:comment xml:lang="en">The state where hydrates are present within the Service Line. This state is a FailureCondition as it makes a future Fault (blockage) likely under continued permissive conditions but isn&apos;t necessarily a Malfunction itself until flow is significantly impeded.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#LostProductivityState -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#LostProductivityState">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#DownState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <rdfs:comment xml:lang="en">The state where the well&apos;s production rate has significantly dropped or stopped due to systemic energy insufficiency (e.g., reservoir pressure decline, BSW increase, viscosity changes). Classified as DownState because the cause is typically external to the immediate component state.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#Malfunction -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#Malfunction">
+        <owl:equivalentClass>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://www.w3id.org/MALFO#functionalIncompatibleWith"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+            </owl:Restriction>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://www.loa.istc.cnr.it/engineering-domain/MalfunctionRelatedHappening"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <rdfs:comment>x is a malfunction means that there is some function x is function-incompatible with
+
+For example, the fracture of an axis is a malfunction because it is function-incompatible with the axis&apos; function of transmitting torque.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#MalfunctionProcess -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#MalfunctionProcess">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Malfunction"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Process"/>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#MereSymptom"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:comment>x is a malfunction process means that x is a malfunction and a process
+
+We introduce malfunction processes to partition completely the malfunction category. For example in Avizienis&apos; Basic concepts and taxonomy of dependable and secure computing 2004, an example of a failure in an integrated circuit is described: a faulty IC is invoked, and this causes, at different time and locations, the presence of wrong values in the calculation process. In our taxonomy, we classify this `erroneus calculation process&apos; as a malfunction process.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#MereSymptom -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#MereSymptom">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <owl:Class>
+                        <owl:complementOf rdf:resource="https://www.w3id.org/MALFO#FailureCondition"/>
+                    </owl:Class>
+                    <owl:Class>
+                        <owl:complementOf rdf:resource="https://www.w3id.org/MALFO#FailureMechanism"/>
+                    </owl:Class>
+                    <owl:Class>
+                        <owl:complementOf rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+                    </owl:Class>
+                    <owl:Restriction>
+                        <owl:onProperty>
+                            <rdf:Description>
+                                <owl:inverseOf rdf:resource="https://www.w3id.org/MALFO#causeOf"/>
+                            </rdf:Description>
+                        </owl:onProperty>
+                        <owl:someValuesFrom rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://www.loa.istc.cnr.it/engineering-domain/MalfunctionRelatedHappening"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <rdfs:comment>x is a mere symptom means that x not a malfunction, nor a failure condition, nor a failure mechnaism, and is caused by a malfunction.
+
+A mere symptom has no causal effect on a system (at least not in the sense of failure mechanisms and conditions) and is therefore differentiated from other occurrence types. For example, if the right headlight of a car is not lit up when it should, the fact that `there is no light beam shined by the headlight&apos; is a mere symptom because the absence of light, by itself, will not cause the failure of other components. The negative causation in \causeOf is considered because the symptom could be the absence of some occurrence that, say, the malfunction prevents (e.g., the missing light in the previous example).</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#NonPerformanceEvent -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#NonPerformanceEvent">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Event"/>
+                    <rdf:Description rdf:about="https://www.w3id.org/MALFO#Malfunction"/>
+                    <owl:Class>
+                        <owl:complementOf rdf:resource="https://www.w3id.org/MALFO#Failure"/>
+                    </owl:Class>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Event"/>
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:comment>x is a non-performance event means that x is a malfunction and an event, but not a failure.
+
+An example of non-performance event occurs when attempting to turn on the right headlight of a car if its lightbulb is broken: `the right headlight did not turn on&apos; is a non-performance event, since it is a malfunction but, by itself, does not cause additional failures.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#NormalOperation -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#NormalOperation">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Occurrent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <rdfs:comment xml:lang="en">Represents Event 0: Normal Operation. This is the intended, functional behavior of the system.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#Occurrent -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#Occurrent">
+        <rdfs:comment>An occurrent is something that happens in time
+
+More precise definitions are left open to interpretation (e.g. through alignment with an upper ontology)</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#PCKBlockedByScaleFault -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#PCKBlockedByScaleFault">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Fault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <rdfs:comment xml:lang="en">The state where the Production Choke Valve is blocked or restricted due to the build-up of scale, preventing proper flow control. This is a Fault achieved via the FailureMechanism of Scaling.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#PCKRestrictedFault -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#PCKRestrictedFault">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Fault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#PCKScaledState"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <rdfs:comment xml:lang="en">The state where the Production Choke Valve is restricted beyond the desired operating point due to a quick, unintended event (e.g., manual error, control system issue), impairing flow control. This is a Fault.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#PCKScaledState -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#PCKScaledState">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#FailureCondition"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#Process"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <rdfs:comment xml:lang="en">The state where scale deposits are present within the Production Choke Valve. This state is a FailureCondition as it makes a future Fault (blockage) more likely but isn&apos;t necessarily a Malfunction itself until flow is significantly impeded.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#Process -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#Process">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Occurrent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:comment>In engineering, a typical example of process is a sequence of states (or, equivalently, of state transitions) related to some physical phenomena. For instance corrosion is a sequence of many single chemical reactions that change the arrangement of the relevant atoms. 
+
+More precise definitions are left open to interpretation (e.g. through alignment with an upper ontology)</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#ProductionLineHydrateBlockedFault">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Fault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#QuickRestrictionInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <rdfs:comment xml:lang="en">The state where the Production Line is blocked by hydrates, preventing flow. This is a Fault achieved via the FailureMechanism of Hydrate Formation.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#QuickRestrictionInPCK -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#QuickRestrictionInPCK">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Failure"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://www.w3id.org/MALFO#achieves"/>
+                <owl:someValuesFrom rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#RapidProductivityLoss"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:comment xml:lang="en">Represents Event 6: Quick Restriction in PCK (Production Choke Valve). This is classified as a Failure because:
+1. It is an Event (a rapid change in valve position/opening).
+2. It is a Malfunction, as the unintended restriction is incompatible with the desired flow control function.
+3. It achieves a Fault: The state &apos;PCK is Undesirably Restricted&apos; is a Fault because it&apos;s a state of inability to perform the function (allow desired flow) due to an internal occurrence (the restriction event, often caused by operational problems or valve malfunction).</rdfs:comment>
+        <www:MALFOachieves rdf:resource="https://www.w3id.org/MALFO#PCKRestrictedFault"/>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#RapidProductivityLoss -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#RapidProductivityLoss">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#NonPerformanceEvent"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ScalingInPCK"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:comment xml:lang="en">Represents Event 5: Rapid Productivity Loss. Reclassified as NonPerformanceEvent.
+1. While it occurs over time, the *rapid* nature suggests focusing on the event of the loss becoming significant or the cessation of flow.
+2. It is a Malfunction, as the loss of productivity is incompatible with the primary function of the well.
+3. It achieves a state of &apos;Lost Productivity&apos; or &apos;Insufficient Flow&apos;, which is typically a DownState (inability to function due to external system factors like reservoir pressure, fluid properties, rather than an internal fault of the pipe/well structure itself). Since it achieves a DownState, not a Fault, it fits NonPerformanceEvent better than Failure.</rdfs:comment>
+        <www:MALFOachieves rdf:resource="https://www.w3id.org/MALFO#LostProductivityState"/>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#ScalingInPCK -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#ScalingInPCK">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#FailureMechanism"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://www.w3id.org/MALFO#transitivePosCauseOf"/>
+                <owl:someValuesFrom rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:comment xml:lang="en">Represents Event 7: Scaling in PCK (Production Choke Valve). The scaling *process* is classified as a FailureMechanism because:
+1. It is a Process (the gradual build-up of inorganic deposits).
+2. It is NOT inherently a Malfunction itself (the process might occur without immediate functional incompatibility).
+3. It transitively positively causes a Failure: The scaling process leads to a restriction or blockage (a Failure event) which achieves the Fault state of &apos;PCK Blocked/Restricted by Scale&apos;. The state &apos;PCK is Scaled&apos; resulting from the process is a FailureCondition.</rdfs:comment>
+        <www:MALFOtransitivePosCauseOf rdf:resource="https://www.w3id.org/MALFO#PCKBlockedByScaleFault"/>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#ServiceLineHydrateBlockedFault">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Fault"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SevereSlugging"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <rdfs:comment xml:lang="en">The state where the Service Line is blocked by hydrates, preventing its intended use. This is a Fault achieved via the FailureMechanism of Hydrate Formation.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#SevereSlugging -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#SevereSlugging">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#MalfunctionProcess"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#SpuriousDHSVClosure"/>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:comment xml:lang="en">Represents Event 3: Severe Slugging. This is classified as a MalfunctionProcess because:
+1. It is a Process (a dynamic, periodic flow pattern over time).
+2. It is a Malfunction, as this unstable flow regime is incompatible with the desired function of stable production flow and can damage equipment.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#SpuriousDHSVClosure -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#SpuriousDHSVClosure">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Failure"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://www.w3id.org/MALFO#achieves"/>
+                <owl:someValuesFrom rdf:resource="https://www.w3id.org/MALFO#DHSVClosedFault"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="https://www.w3id.org/MALFO#State"/>
+        <rdfs:comment xml:lang="en">Represents Event 2: Spurious Closure of DHSV (Downhole Safety Valve). This is classified as a Failure because:
+1. It is an Event (the unexpected closure).
+2. It is a Malfunction, as the closed valve is incompatible with the function of allowing production flow.
+3. It achieves a Fault: The state &apos;DHSV is Spontaneously Closed&apos; is a Fault because it&apos;s a state of inability to perform the function (allow flow) due to an internal occurrence (the spurious closure event) within the valve itself.</rdfs:comment>
+        <www:MALFOachieves rdf:resource="https://www.w3id.org/MALFO#DHSVClosedFault"/>
+    </owl:Class>
+    
+
+
+    <!-- https://www.w3id.org/MALFO#State -->
+
+    <owl:Class rdf:about="https://www.w3id.org/MALFO#State">
+        <rdfs:subClassOf rdf:resource="https://www.w3id.org/MALFO#Occurrent"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://www.w3id.org/MALFO#achieves"/>
+                <owl:allValuesFrom rdf:resource="https://www.w3id.org/MALFO#State"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://www.w3id.org/MALFO#prevents"/>
+                <owl:allValuesFrom rdf:resource="https://www.w3id.org/MALFO#State"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>In engineering states are often described by specifying some characteristics (form, value of a process variable, ...) of the entities participating in the state (e.g. `the shaft is broken&apos;, `high oven temperature&apos;, or `the oven temperature is increasing&apos;).
+
+More precise definitions are left open to interpretation (e.g. through alignment with an upper ontology)</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotations
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <rdf:Description rdf:about="https://www.w3id.org/MALFO#SystemicFunctionOf">
+        <rdfs:comment>“x is a systemic function of y if and only if x is a role and there exist a system z
+and a goal g for z such that x classifies only behaviours which have y as doer and
+part of z, and that causally contribute to achieve g.”</rdfs:comment>
+    </rdf:Description>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#Event"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#Process"/>
+            <rdf:Description rdf:about="https://www.w3id.org/MALFO#State"/>
+        </owl:members>
+    </rdf:Description>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Rules
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <rdf:Description rdf:about="https://www.w3id.org/MALFO#z">
+        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="https://www.w3id.org/MALFO#x">
+        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
+    </rdf:Description>
+    <rdf:Description>
+        <swrla:isRuleEnabled rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</swrla:isRuleEnabled>
+        <rdfs:comment></rdfs:comment>
+        <rdfs:label>fault-sufficient-implication</rdfs:label>
+        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Imp"/>
+        <swrl:body>
+            <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+                <rdf:first>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+                        <swrl:propertyPredicate rdf:resource="https://www.w3id.org/MALFO#achieves"/>
+                        <swrl:argument1 rdf:resource="https://www.w3id.org/MALFO#z"/>
+                        <swrl:argument2 rdf:resource="https://www.w3id.org/MALFO#x"/>
+                    </rdf:Description>
+                </rdf:first>
+                <rdf:rest>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+                        <rdf:first>
+                            <rdf:Description>
+                                <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
+                                <swrl:classPredicate rdf:resource="https://www.w3id.org/MALFO#Malfunction"/>
+                                <swrl:argument1 rdf:resource="https://www.w3id.org/MALFO#x"/>
+                            </rdf:Description>
+                        </rdf:first>
+                        <rdf:rest>
+                            <rdf:Description>
+                                <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+                                <rdf:first>
+                                    <rdf:Description>
+                                        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+                                        <swrl:propertyPredicate rdf:resource="https://www.w3id.org/MALFO#internalTo"/>
+                                        <swrl:argument1 rdf:resource="https://www.w3id.org/MALFO#z"/>
+                                        <swrl:argument2 rdf:resource="https://www.w3id.org/MALFO#x"/>
+                                    </rdf:Description>
+                                </rdf:first>
+                                <rdf:rest>
+                                    <rdf:Description>
+                                        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+                                        <rdf:first>
+                                            <rdf:Description>
+                                                <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
+                                                <swrl:classPredicate rdf:resource="https://www.w3id.org/MALFO#State"/>
+                                                <swrl:argument1 rdf:resource="https://www.w3id.org/MALFO#x"/>
+                                            </rdf:Description>
+                                        </rdf:first>
+                                        <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                                    </rdf:Description>
+                                </rdf:rest>
+                            </rdf:Description>
+                        </rdf:rest>
+                    </rdf:Description>
+                </rdf:rest>
+            </rdf:Description>
+        </swrl:body>
+        <swrl:head>
+            <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+                <rdf:first>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
+                        <swrl:classPredicate rdf:resource="https://www.w3id.org/MALFO#Fault"/>
+                        <swrl:argument1 rdf:resource="https://www.w3id.org/MALFO#x"/>
+                    </rdf:Description>
+                </rdf:first>
+                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+            </rdf:Description>
+        </swrl:head>
+    </rdf:Description>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.26.2023-07-17T20:34:13Z) https://github.com/owlcs/owlapi -->
+

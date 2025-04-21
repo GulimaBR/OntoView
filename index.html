@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ontology Visualizer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Ontology Visualizer</h1>
+      <div class="file-input">
+        <input type="file" id="ontology-file" accept=".owl, .rdf, .xml">
+        <button id="load-default">Load Sample Ontology</button>
+        <div class="controls">
+          <div class="layout-toggle">
+            <label>Layout: </label>
+            <select id="layout-direction">
+              <option value="vertical" selected>Vertical</option>
+              <option value="horizontal">Horizontal</option>
+            </select>
+          </div>
+          <div class="language-selector">
+            <label>Language: </label>
+            <select id="language-selector">
+              <option value="en" selected>English</option>
+              <option value="pt">Portuguese</option>
+              <option value="es">Spanish</option>
+              <option value="fr">French</option>
+              <option value="de">German</option>
+              <option value="it">Italian</option>
+              <!-- Other languages can be added here -->
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="vis-container">
+      <div id="ontology-graph"></div>
+      <div id="info-panel">
+        <h2>Class Information</h2>
+        <div id="class-info">
+          <p>Click on a class to see its details.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
