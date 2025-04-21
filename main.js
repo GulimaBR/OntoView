@@ -36,8 +36,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Load default ontology on page load
   loadDefaultOntology();
   
-  // Add search functionality - with improved GitHub Pages compatibility
-  initializeSearch();
+  // Add search functionality with delayed initialization for GitHub Pages compatibility
+  // Use setTimeout to ensure the DOM is fully loaded and rendered
+  setTimeout(initializeSearch, 500);
   
   function initializeSearch() {
     try {
@@ -45,25 +46,46 @@ document.addEventListener('DOMContentLoaded', function() {
       const searchButton = document.getElementById('search-button');
       
       if (!searchInput || !searchButton) {
-        console.error('Search elements not found in DOM');
+        console.error('Search elements not found in DOM - will retry');
+        // Try again after a short delay if elements not found
+        setTimeout(initializeSearch, 500);
         return;
       }
       
-      // Search button click event
-      searchButton.addEventListener('click', performSearch);
+      // Search button click event with explicit bind to window context
+      searchButton.onclick = performSearch;
       
-      // Enter key in search input
-      searchInput.addEventListener('keypress', function(event) {
+      // Enter key in search input with explicit bind
+      searchInput.onkeypress = function(event) {
         if (event.key === 'Enter') {
           event.preventDefault();
           performSearch();
         }
-      });
+      };
       
       // Log successful initialization
-      console.log('Search functionality initialized successfully');
+      console.log('Search functionality initialized successfully at', new Date().toISOString());
+      
+      // Add a test search result to verify the styling
+      if (window.location.href.includes('github.io')) {
+        console.log('GitHub Pages detected - testing search result styling');
+        setTimeout(() => {
+          const testSearch = () => {
+            try {
+              const dummyMatches = [{id: 'test-class', name: 'Test Class'}];
+              showSearchResults(dummyMatches);
+              console.log('Test search results displayed');
+            } catch (e) {
+              console.error('Error displaying test results:', e);
+            }
+          };
+          testSearch();
+        }, 1000);
+      }
     } catch (error) {
       console.error('Error initializing search:', error);
+      // Retry once more after an error
+      setTimeout(initializeSearch, 1000);
     }
   }
   
@@ -181,13 +203,31 @@ document.addEventListener('DOMContentLoaded', function() {
       matches.forEach(match => {
         const resultItem = document.createElement('div');
         resultItem.className = 'search-result-item';
-        resultItem.textContent = match.name || match.id;
         
-        // Style the result item
+        // Use innerText instead of textContent for better display
+        resultItem.innerText = match.name || match.id; 
+        
+        // Style the result item with more explicit styles
         Object.assign(resultItem.style, {
           padding: '8px 12px',
           cursor: 'pointer',
-          borderBottom: '1px solid #eee'
+          borderBottom: '1px solid #eee',
+          color: '#333',
+          fontSize: '14px',
+          display: 'block',
+          width: '100%',
+          textAlign: 'left',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis'
+        });
+        
+        // Add hover effect
+        resultItem.addEventListener('mouseover', () => {
+          resultItem.style.backgroundColor = '#f0f0f0';
+        });
+        resultItem.addEventListener('mouseout', () => {
+          resultItem.style.backgroundColor = 'white';
         });
         
         // Click event
