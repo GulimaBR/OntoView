@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Load default ontology on page load
   loadDefaultOntology();
   
-  // Add search functionality with delayed initialization for GitHub Pages compatibility
+  // Add search functionality with delayed initialization for cross-browser compatibility
   // Use setTimeout to ensure the DOM is fully loaded and rendered
   setTimeout(initializeSearch, 500);
   
@@ -46,44 +46,22 @@ document.addEventListener('DOMContentLoaded', function() {
       const searchButton = document.getElementById('search-button');
       
       if (!searchInput || !searchButton) {
-        console.error('Search elements not found in DOM - will retry');
         // Try again after a short delay if elements not found
         setTimeout(initializeSearch, 500);
         return;
       }
       
-      // Search button click event with explicit bind to window context
+      // Search button click event
       searchButton.onclick = performSearch;
       
-      // Enter key in search input with explicit bind
+      // Enter key in search input
       searchInput.onkeypress = function(event) {
         if (event.key === 'Enter') {
           event.preventDefault();
           performSearch();
         }
       };
-      
-      // Log successful initialization
-      console.log('Search functionality initialized successfully at', new Date().toISOString());
-      
-      // Add a test search result to verify the styling
-      if (window.location.href.includes('github.io')) {
-        console.log('GitHub Pages detected - testing search result styling');
-        setTimeout(() => {
-          const testSearch = () => {
-            try {
-              const dummyMatches = [{id: 'test-class', name: 'Test Class'}];
-              showSearchResults(dummyMatches);
-              console.log('Test search results displayed');
-            } catch (e) {
-              console.error('Error displaying test results:', e);
-            }
-          };
-          testSearch();
-        }, 1000);
-      }
     } catch (error) {
-      console.error('Error initializing search:', error);
       // Retry once more after an error
       setTimeout(initializeSearch, 1000);
     }
